@@ -1,0 +1,16 @@
+D:\Diplom\Editor\Editor\bin\Debug\Editor.exe.config
+D:\Diplom\Editor\Editor\bin\Debug\Editor.exe
+D:\Diplom\Editor\Editor\bin\Debug\Editor.pdb
+D:\Diplom\Editor\Editor\obj\Debug\Editor.csprojResolveAssemblyReference.cache
+D:\Diplom\Editor\Editor\obj\Debug\MainWindow.g.cs
+D:\Diplom\Editor\Editor\obj\Debug\App.g.cs
+D:\Diplom\Editor\Editor\obj\Debug\Editor_MarkupCompile.cache
+D:\Diplom\Editor\Editor\obj\Debug\Editor_MarkupCompile.lref
+D:\Diplom\Editor\Editor\obj\Debug\MainWindow.baml
+D:\Diplom\Editor\Editor\obj\Debug\Editor.g.resources
+D:\Diplom\Editor\Editor\obj\Debug\Editor.Properties.Resources.resources
+D:\Diplom\Editor\Editor\obj\Debug\Editor.csproj.GenerateResource.Cache
+D:\Diplom\Editor\Editor\obj\Debug\Editor.exe
+D:\Diplom\Editor\Editor\obj\Debug\Editor.pdb
+D:\Diplom\Editor\Editor\obj\Debug\Windows\WindowForEditNaim.g.cs
+D:\Diplom\Editor\Editor\obj\Debug\Windows\WindowForEditNaim.baml
