@@ -20,25 +20,34 @@ namespace Editor
 {
     public partial class MainWindow : Window
     {
-        TreeViewModal buffer,current,root;
-        List<ObservableCollection<TreeViewModal>> history;
+        TreeViewModal buffer,current;
+        List<TreeViewModal> history;
+        ObservableCollection<TreeViewModal> Root;
         int current_index;
+        bool is_buffer = false,
+            is_history_end = true,
+            is_history_begin = true,
+            is_save = true,
+            is_select = false,
+            is_open = false;
 
         public MainWindow()
         {
             InitializeComponent();
         }
 
+        #region CommandBinding
+
         void CommandBinding_New(object sender, ExecutedRoutedEventArgs e)
         {
-            history = new List<ObservableCollection<TreeViewModal>>();
-            ObservableCollection<TreeViewModal> Root = new ObservableCollection<TreeViewModal>();
+            history = new List<TreeViewModal>();
+            Root = new ObservableCollection<TreeViewModal>();
             Root.Add(TreeViewModal.NewItem(null));
             tree.ItemsSource = Root;
-            root = Root[0];
             Historian();
-            root.IsHistoryBegin = true;
-            root.IsOpen = true;
+            is_history_begin = true;
+            is_open = true;
+            is_save = false;
         }
 
         void CommandBinding_Open(object sender, ExecutedRoutedEventArgs e)
@@ -59,41 +68,48 @@ namespace Editor
         void CommandBinding_Undo(object sender, ExecutedRoutedEventArgs e)
         {
             current_index--;
-            tree.ItemsSource = history[current_index];
-            if (current_index == 0) root.IsHistoryBegin = true;
-            root.IsHistoryEnd = false;
+            Root = new ObservableCollection<TreeViewModal>();
+            Root.Add(history[current_index]);
+            tree.ItemsSource = Root;
+            if (current_index == 0) is_history_begin = true;
+            is_history_end = false;
         }
 
         void CommandBinding_Forward(object sender, ExecutedRoutedEventArgs e)
         {
             current_index++;
-            tree.ItemsSource = history[current_index];
-            if (current_index == history.Count-1) root.IsHistoryEnd = true;
-            root.IsHistoryBegin = false;
+            Root = new ObservableCollection<TreeViewModal>();
+            Root.Add(history[current_index]);
+            tree.ItemsSource = Root;
+            if (current_index == history.Count-1) is_history_end = true;
+            is_history_begin = false;
         }
 
         void CommandBinding_Cut(object sender, ExecutedRoutedEventArgs e)
         {
-            current = (e.Source as TreeView).SelectedItem as TreeViewModal;
             buffer = current.Clone;
             current.Parent.Children.Remove(current);
             Historian();
-            root.IsBuffer = true;
+            is_buffer = true;
         }
 
         void CommandBinding_Copy(object sender, ExecutedRoutedEventArgs e)
         {
-            current = (e.Source as TreeView).SelectedItem as TreeViewModal;
             buffer = current.Clone;
-            root.IsBuffer = true;
+            is_buffer = true;
         }
 
         void CommandBinding_Paste(object sender, ExecutedRoutedEventArgs e)
         {
-            current = (e.Source as TreeView).SelectedItem as TreeViewModal;
             current.Children.Add(buffer.Clone);
             Historian();
-            root.IsBuffer = true;
+            is_save = false;
+        }
+
+        void CommandBinding_Delete(object sender, ExecutedRoutedEventArgs e)
+        {
+            current.Parent.Children.Remove(current);
+            is_save = false;
         }
 
         void CommandBinding_Help(object sender, ExecutedRoutedEventArgs e)
@@ -106,9 +122,56 @@ namespace Editor
             this.Close();
         }
 
+        #endregion
+
+        #region Can_Execute
+
+        private void Save_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = !is_save;
+        }
+
+        private void SaveAs_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = is_open;
+        }
+
+        private void Cut_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = is_select;
+        }
+
+        private void Copy_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = is_select;
+        }
+
+        private void Paste_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = is_buffer&&is_select;
+        }
+
+        private void Undo_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = !is_history_begin;
+        }
+
+        private void Forward_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = !is_history_end;
+        }
+
+        private void Delete_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = is_select;
+        }
+
+        #endregion
+
         private void tree_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
-            root.IsSelect = true;
+            current = tree.SelectedItem as TreeViewModal;
+            is_select = true;
         }
 
         private void MenuItem_Click(object sender, RoutedEventArgs e)
@@ -116,12 +179,12 @@ namespace Editor
             current = (sender as MenuItem).DataContext as TreeViewModal;
             current.Children.Add(TreeViewModal.NewItem(current));
             Historian();
+            is_save = false;
         }
-
         void Historian()
         {
-            history.Add(tree.ItemsSource as ObservableCollection<TreeViewModal>);
-            root.IsHistoryBegin = false;
+            history.Add((tree.ItemsSource as ObservableCollection<TreeViewModal>)[0].Clone);
+            is_history_begin = false;
             current_index = history.Count - 1;
         }
     }

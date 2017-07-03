@@ -15,23 +15,33 @@
         <CommandBinding Command="Open" 
                         Executed="CommandBinding_Open"/>
         <CommandBinding Command="Save" 
-                        Executed="CommandBinding_Save"/>
+                        Executed="CommandBinding_Save"
+                        CanExecute="Save_CanExecute"/>
         <CommandBinding Command="SaveAs" 
-                        Executed="CommandBinding_SaveAs"/>
+                        Executed="CommandBinding_SaveAs"
+                        CanExecute="SaveAs_CanExecute"/>
         <CommandBinding Command="Cut" 
-                        Executed="CommandBinding_Cut"/>
+                        Executed="CommandBinding_Cut"
+                        CanExecute="Cut_CanExecute"/>
         <CommandBinding Command="Copy" 
-                        Executed="CommandBinding_Copy"/>
+                        Executed="CommandBinding_Copy"
+                        CanExecute="Copy_CanExecute"/>
         <CommandBinding Command="Paste" 
-                        Executed="CommandBinding_Paste"/>
+                        Executed="CommandBinding_Paste"
+                        CanExecute="Paste_CanExecute"/>
         <CommandBinding Command="Undo" 
-                        Executed="CommandBinding_Undo"/>
+                        Executed="CommandBinding_Undo"
+                        CanExecute="Undo_CanExecute"/>
         <CommandBinding Command="Help" 
                         Executed="CommandBinding_Help"/>
         <CommandBinding Command="Close" 
                         Executed="CommandBinding_Close"/>
         <CommandBinding Command="classes:Commands.Forward" 
-                        Executed="CommandBinding_Forward"/>
+                        Executed="CommandBinding_Forward"
+                        CanExecute="Forward_CanExecute"/>
+        <CommandBinding Command="Delete" 
+                        Executed="CommandBinding_Delete"
+                        CanExecute="Delete_CanExecute"/>
     </Window.CommandBindings>
     <Window.InputBindings>
         <KeyBinding Command="classes:Commands.Forward" 
@@ -39,7 +49,7 @@
                     Modifiers="Ctrl"/>
     </Window.InputBindings>
     <Window.Resources>
-        <ContextMenu x:Key="Context_menu_root">
+        <ContextMenu x:Key="Context_menu_mvm">
             <MenuItem Header="Новый лист" 
                       Click="MenuItem_Click"/>
             <Separator/>
@@ -48,24 +58,7 @@
             <MenuItem Header="Копировать" 
                       Command="Copy"/>
             <MenuItem Header="Вставить" 
-                      Command="Paste">
-                <MenuItem.Resources>
-                    <Style TargetType="MenuItem">
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding IsBuffer}" 
-                                         Value="True">
-                                <Setter Property="IsEnabled" 
-                                        Value="True" />
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding IsBuffer}" 
-                                         Value="False">
-                                <Setter Property="IsEnabled" 
-                                        Value="False" />
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </MenuItem.Resources>
-            </MenuItem>
+                      Command="Paste"/>
         </ContextMenu>
     </Window.Resources>
     <Grid>
@@ -81,47 +74,9 @@
                           Command="Open"/>
                 <Separator/>
                 <MenuItem Header="Сохранить" 
-                          Command="Save" 
-                          IsEnabled="False"
-                          x:Name="menu_save">
-                    <MenuItem.Resources>
-                        <Style TargetType="MenuItem">
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsSave}" 
-                                             Value="True">
-                                    <Setter Property="IsEnabled" 
-                                            Value="False" />
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding IsSave}"
-                                             Value="False">
-                                    <Setter Property="IsEnabled" 
-                                            Value="True" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </MenuItem.Resources>
-                </MenuItem>
+                          Command="Save"/>
                 <MenuItem Header="Сохранить как..." 
-                          Command="SaveAs" 
-                          IsEnabled="False"
-                          x:Name="menu_saveas">
-                    <MenuItem.Resources>
-                        <Style TargetType="MenuItem">
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsOpen}" 
-                                             Value="True">
-                                    <Setter Property="IsEnabled" 
-                                            Value="True" />
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding DataContext.IsOpen}" 
-                                             Value="False">
-                                    <Setter Property="IsEnabled" 
-                                            Value="False" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </MenuItem.Resources>
-                </MenuItem>
+                          Command="SaveAs"/>
                 <Separator/>
                 <MenuItem Header="Импорт"/>
                 <MenuItem Header="Экспорт"/>
@@ -131,133 +86,19 @@
             </MenuItem>
             <MenuItem Header="Изменить">
                 <MenuItem Header="Отменить" 
-                          Command="Undo" 
-                          IsEnabled="False"
-                           x:Name="menu_undo">
-                    <MenuItem.Resources>
-                        <Style TargetType="MenuItem">
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsHistoryBegin}" 
-                                             Value="True">
-                                    <Setter Property="IsEnabled" 
-                                            Value="False" />
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding IsHistoryBegin}" 
-                                             Value="False">
-                                    <Setter Property="IsEnabled" 
-                                            Value="True" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </MenuItem.Resources>
-                </MenuItem>
+                          Command="Undo"/>
                 <MenuItem Header="Вернуть" 
                           Command="classes:Commands.Forward" 
-                          IsEnabled="False" 
-                          InputGestureText="Ctrl+Y"
-                          x:Name="menu_forward">
-                    <MenuItem.Resources>
-                        <Style TargetType="MenuItem">
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsHistoryEnd}"
-                                             Value="True">
-                                    <Setter Property="IsEnabled" 
-                                            Value="False" />
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding IsHistoryEnd}" 
-                                             Value="False">
-                                    <Setter Property="IsEnabled" 
-                                            Value="True" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </MenuItem.Resources>
-                </MenuItem>
+                          InputGestureText="Ctrl+Y"/>
                 <Separator/>
                 <MenuItem Header="Вырезать" 
-                          Command="Cut" 
-                          IsEnabled="False"
-                          x:Name="menu_cut">
-                    <MenuItem.Resources>
-                        <Style TargetType="MenuItem">
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsSelect}" 
-                                             Value="True">
-                                    <Setter Property="IsEnabled" 
-                                            Value="True" />
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding IsSelect}" 
-                                             Value="False">
-                                    <Setter Property="IsEnabled" 
-                                            Value="False" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </MenuItem.Resources>
-                </MenuItem>
+                          Command="Cut"/>
                 <MenuItem Header="Копировать" 
-                          Command="Copy" 
-                          IsEnabled="False"
-                          x:Name="menu_copy">
-                    <MenuItem.Resources>
-                        <Style TargetType="MenuItem">
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsSelect}" 
-                                             Value="True">
-                                    <Setter Property="IsEnabled"
-                                            Value="True" />
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding IsSelect}"
-                                             Value="False">
-                                    <Setter Property="IsEnabled" 
-                                            Value="False" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </MenuItem.Resources>
-                </MenuItem>
+                          Command="Copy" />
                 <MenuItem Header="Вставить" 
-                          Command="Paste" 
-                          IsEnabled="False"
-                          x:Name="menu_paste">
-                    <MenuItem.Resources>
-                        <Style TargetType="MenuItem">
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsBuffer}"
-                                             Value="True">
-                                    <Setter Property="IsEnabled" 
-                                            Value="True" />
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding IsBuffer}" 
-                                             Value="False">
-                                    <Setter Property="IsEnabled" 
-                                            Value="False" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </MenuItem.Resources>
-                </MenuItem>
+                          Command="Paste"/>
                 <MenuItem Header="Удалить" 
-                          Command="Delete" 
-                          IsEnabled="False"
-                          x:Name="menu_delete">
-                    <MenuItem.Resources>
-                        <Style TargetType="MenuItem">
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsSelect}" 
-                                             Value="True">
-                                    <Setter Property="IsEnabled"
-                                            Value="True" />
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding IsSelect}" 
-                                             Value="False">
-                                    <Setter Property="IsEnabled" 
-                                            Value="False" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </MenuItem.Resources>
-                </MenuItem>
+                          Command="Delete"/>
             </MenuItem>
             <MenuItem Header="Справка">
                 <MenuItem Header="Просмотр справки"
@@ -271,7 +112,7 @@
             <TreeView.ItemTemplate>
                 <HierarchicalDataTemplate ItemsSource="{Binding Children}" >
                     <TextBlock Text="{Binding Naim}" 
-                               ContextMenu="{StaticResource Context_menu_root}"/>
+                               ContextMenu="{StaticResource Context_menu_mvm}"/>
                 </HierarchicalDataTemplate>
             </TreeView.ItemTemplate>
         </TreeView>
