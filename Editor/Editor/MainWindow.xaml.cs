@@ -151,6 +151,7 @@ namespace Editor
             e.CanExecute = is_buffer&&is_select;
         }
 
+
         private void Undo_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
             e.CanExecute = !is_history_begin;
@@ -186,6 +187,12 @@ namespace Editor
             history.Add((tree.ItemsSource as ObservableCollection<TreeViewModal>)[0].Clone);
             is_history_begin = false;
             current_index = history.Count - 1;
+        }
+
+        private void MenuItem_Click_1(object sender, RoutedEventArgs e)
+        {
+            WindowForEditNaim WFEN = new WindowForEditNaim(tree.SelectedItem as TreeViewModal);
+            WFEN.ShowDialog();
         }
     }
 }

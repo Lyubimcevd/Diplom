@@ -59,6 +59,7 @@
                       Command="Copy"/>
             <MenuItem Header="Вставить" 
                       Command="Paste"/>
+            <MenuItem Header="Переименовать" Click="MenuItem_Click_1"/>
         </ContextMenu>
     </Window.Resources>
     <Grid>
