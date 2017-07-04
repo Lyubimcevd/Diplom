@@ -5,20 +5,25 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Collections.ObjectModel;
 using Editor.Windows;
+using System.ComponentModel;
 
 namespace Editor.Classes
 {
-    public class TreeViewModal
+    [Serializable]
+    public class TreeViewModal:INotifyPropertyChanged
     {
         ObservableCollection<TreeViewModal> children = new ObservableCollection<TreeViewModal>();
         string naim;
-        TreeViewModal parent;  
+        TreeViewModal parent;
+        bool is_expanded;
+
+        public event PropertyChangedEventHandler PropertyChanged;
 
         public TreeViewModal() { }
         public TreeViewModal(TreeViewModal pparent)
         {
             parent = pparent;
-        } 
+        }
         public ObservableCollection<TreeViewModal> Children
         {
             get
@@ -68,6 +73,22 @@ namespace Editor.Classes
             {
                 parent = value;
             }
+        }
+        public bool IsExpanded
+        {
+            get
+            {
+                return is_expanded;
+            }
+            set
+            {
+                is_expanded = value;
+                OnPropertyChanged("IsExpanded");
+            }
+        }
+        public void OnPropertyChanged(string prop)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
         }
     }
 }

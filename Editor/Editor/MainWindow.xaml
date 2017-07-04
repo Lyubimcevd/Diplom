@@ -8,7 +8,8 @@
         mc:Ignorable="d"
         Title="MainWindow" 
         Height="350" 
-        Width="525">
+        Width="525" 
+        Closing="Window_Closing">
     <Window.CommandBindings>
         <CommandBinding Command="New" 
                         Executed="CommandBinding_New"/>
@@ -51,7 +52,7 @@
     <Window.Resources>
         <ContextMenu x:Key="Context_menu_mvm">
             <MenuItem Header="Новый лист" 
-                      Click="MenuItem_Click"/>
+                      Click="Add_New_Element"/>
             <Separator/>
             <MenuItem Header="Вырезать" 
                       Command="Cut"/>
@@ -59,7 +60,8 @@
                       Command="Copy"/>
             <MenuItem Header="Вставить" 
                       Command="Paste"/>
-            <MenuItem Header="Переименовать" Click="MenuItem_Click_1"/>
+            <MenuItem Header="Переименовать" 
+                      Click="Rename"/>
         </ContextMenu>
     </Window.Resources>
     <Grid>
@@ -109,13 +111,20 @@
             </MenuItem>
         </Menu>
         <TreeView x:Name="tree"
-                  Grid.Row="1" SelectedItemChanged="tree_SelectedItemChanged">
+                  Grid.Row="1" 
+                  SelectedItemChanged="tree_SelectedItemChanged">
             <TreeView.ItemTemplate>
-                <HierarchicalDataTemplate ItemsSource="{Binding Children}" >
-                    <TextBlock Text="{Binding Naim}" 
-                               ContextMenu="{StaticResource Context_menu_mvm}"/>
+                <HierarchicalDataTemplate ItemsSource="{Binding Children}">
+                    <TextBlock Text="{Binding Naim}"
+                               ContextMenu="{StaticResource Context_menu_mvm}" 
+                               MouseLeftButtonDown="Rename_DoubleClick"/>
                 </HierarchicalDataTemplate>
             </TreeView.ItemTemplate>
+            <TreeView.ItemContainerStyle>
+                <Style TargetType="TreeViewItem">
+                    <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}"/>
+                </Style>
+            </TreeView.ItemContainerStyle>
         </TreeView>
     </Grid>
 </Window>
