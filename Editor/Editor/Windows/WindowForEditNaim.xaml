@@ -7,11 +7,12 @@
         mc:Ignorable="d"
         Title="Введите наименование" 
         Height="100"
-        Width="200">
+        Width="300" 
+        Closing="Window_Closing">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="30"/>
-            <RowDefinition Height="30"/>
+            <RowDefinition/>
         </Grid.RowDefinitions>
         <TextBox x:Name="textbox"
                  Text="{Binding Naim}" 

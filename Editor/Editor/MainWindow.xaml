@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:Editor"
         xmlns:classes="clr-namespace:Editor.Classes"
         mc:Ignorable="d"
-        Title="MainWindow" 
+        Title="{Binding Title}" 
         Height="350" 
         Width="525" 
         Closing="Window_Closing">
@@ -30,6 +30,9 @@
         <CommandBinding Command="Paste" 
                         Executed="CommandBinding_Paste"
                         CanExecute="Paste_CanExecute"/>
+        <CommandBinding Command="classes:Commands.Rename" 
+                        Executed="CommandBinding_Rename"
+                        CanExecute="Rename_CanExecute"/>
         <CommandBinding Command="Undo" 
                         Executed="CommandBinding_Undo"
                         CanExecute="Undo_CanExecute"/>
@@ -61,7 +64,7 @@
             <MenuItem Header="Вставить" 
                       Command="Paste"/>
             <MenuItem Header="Переименовать" 
-                      Click="Rename"/>
+                      Command="classes:Commands.Rename"/>
         </ContextMenu>
     </Window.Resources>
     <Grid>
@@ -81,8 +84,10 @@
                 <MenuItem Header="Сохранить как..." 
                           Command="SaveAs"/>
                 <Separator/>
-                <MenuItem Header="Импорт"/>
-                <MenuItem Header="Экспорт"/>
+                <MenuItem Header="Импорт" 
+                          Click="Import_Click"/>
+                <MenuItem Header="Экспорт" 
+                          Click="Export_Click"/>
                 <Separator/>
                 <MenuItem Header="Выход" 
                           Command="Close"/>
@@ -107,7 +112,8 @@
                 <MenuItem Header="Просмотр справки"
                           Command="Help"/>
                 <Separator/>
-                <MenuItem Header="О программе АРМ Эксперта Редактор"/>
+                <MenuItem Header="О программе АРМ Эксперта Редактор" 
+                          Click="About_Click"/>
             </MenuItem>
         </Menu>
         <TreeView x:Name="tree"

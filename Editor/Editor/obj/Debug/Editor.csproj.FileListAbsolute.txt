@@ -13,4 +13,7 @@ D:\Diplom\Editor\Editor\obj\Debug\Editor.exe
 D:\Diplom\Editor\Editor\obj\Debug\Editor.pdb
 D:\Diplom\Editor\Editor\obj\Debug\Windows\WindowForEditNaim.g.cs
 D:\Diplom\Editor\Editor\obj\Debug\Windows\WindowForEditNaim.baml
+D:\Diplom\Editor\Editor\obj\Debug\Interop.SHDocVw.dll
+D:\Diplom\Editor\Editor\obj\Debug\Editor.csproj.ResolveComReference.cache
+D:\Diplom\Editor\Editor\obj\Debug\Editor.Windows.AboutBox.resources
 D:\Diplom\Editor\Editor\obj\Debug\Editor.csprojResolveAssemblyReference.cache

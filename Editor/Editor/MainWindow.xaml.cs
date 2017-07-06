@@ -24,11 +24,16 @@ namespace Editor
     public partial class MainWindow : Window
     {
         TreeViewModal buffer,current;
+        TitleViewModal windows_title;
         List<TreeViewModal> history;
         ObservableCollection<TreeViewModal> Root;
         OpenFileDialog OFD;
         SaveFileDialog SFD;
         BinaryFormatter BF;
+        SHDocVw.InternetExplorer IE;
+        AboutBox AB;
+        StreamWriter SW;
+        StreamReader SR;
         string save_path;
         int current_index;
         bool is_buffer = false,
@@ -42,6 +47,8 @@ namespace Editor
         {
             InitializeComponent();
             history = new List<TreeViewModal>();
+            windows_title = new TitleViewModal("АРМ Эксперта Редактор");
+            this.DataContext = windows_title;
         }
 
         #region CommandBinding
@@ -49,15 +56,13 @@ namespace Editor
         void CommandBinding_New(object sender, ExecutedRoutedEventArgs e)
         {
             Root = new ObservableCollection<TreeViewModal>();
-            Root.Add(TreeViewModal.NewItem(null));
-            if (Root[0].Naim != null)
-            {
-                tree.ItemsSource = Root;
-                Historian();
-                is_history_begin = true;
-                is_open = true;
-                is_save = false;
-            }
+            Root.Add(new TreeViewModal("Показатели качества",null));
+            windows_title.Title = "АРМ Эксперта Редактор*";        
+            tree.ItemsSource = Root;
+            Historian();
+            is_history_begin = true;
+            is_open = true;
+            is_save = false;
         }
 
         void CommandBinding_Open(object sender, ExecutedRoutedEventArgs e)
@@ -79,6 +84,7 @@ namespace Editor
                     Root.Add(BF.Deserialize(fs) as TreeViewModal);
                 }
                 tree.ItemsSource = Root;
+                windows_title.Title = "АРМ Эксперта Редактор:"+OFD.FileName;
 
                 is_open = true;
                 is_save = true;
@@ -115,6 +121,9 @@ namespace Editor
                 {
                     BF.Serialize(fs, Root[0]);
                 }
+
+                windows_title.Title = "АРМ Эксперта Редактор:" + SFD.FileName;
+
                 is_save = true;
             }
         }
@@ -127,6 +136,7 @@ namespace Editor
             tree.ItemsSource = Root;
             if (current_index == 0) is_history_begin = true;
             is_history_end = false;
+            NotSave();
         }
 
         void CommandBinding_Forward(object sender, ExecutedRoutedEventArgs e)
@@ -137,6 +147,7 @@ namespace Editor
             tree.ItemsSource = Root;
             if (current_index == history.Count-1) is_history_end = true;
             is_history_begin = false;
+            NotSave();
         }
 
         void CommandBinding_Cut(object sender, ExecutedRoutedEventArgs e)
@@ -145,6 +156,7 @@ namespace Editor
             current.Parent.Children.Remove(current);
             Historian();
             is_buffer = true;
+            NotSave();
         }
 
         void CommandBinding_Copy(object sender, ExecutedRoutedEventArgs e)
@@ -157,18 +169,27 @@ namespace Editor
         {
             current.Children.Add(buffer.Clone);
             Historian();
-            is_save = false;
+            NotSave();
+        }
+
+        void CommandBinding_Rename(object sender, ExecutedRoutedEventArgs e)
+        {
+            WindowForEditNaim WFEN = new WindowForEditNaim(current);
+            WFEN.ShowDialog();
+            NotSave();
         }
 
         void CommandBinding_Delete(object sender, ExecutedRoutedEventArgs e)
         {
             current.Parent.Children.Remove(current);
-            is_save = false;
+            NotSave();
         }
 
         void CommandBinding_Help(object sender, ExecutedRoutedEventArgs e)
         {
-
+            IE = new SHDocVw.InternetExplorer();    
+            IE.Navigate(System.Windows.Forms.Application.StartupPath + @"Help\Help.html");
+            IE.Visible = true;
         }
 
         void CommandBinding_Close(object sender, ExecutedRoutedEventArgs e)
@@ -205,6 +226,11 @@ namespace Editor
             e.CanExecute = is_buffer&&is_select;
         }
 
+        private void Rename_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = is_select;
+        }
+
         private void Undo_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
             e.CanExecute = !is_history_begin;
@@ -222,31 +248,91 @@ namespace Editor
 
         #endregion
 
+        private void About_Click(object sender, RoutedEventArgs e)
+        {
+            AB = new AboutBox();
+            AB.ShowDialog();
+        }
+
+        private void Import_Click(object sender, RoutedEventArgs e)
+        {
+            OFD = new OpenFileDialog();
+            OFD.Filter = "Текстовый файл (*.txt)|*.txt|Все файлы (*.*)|*.*";
+            OFD.RestoreDirectory = true;
+
+            if (OFD.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                if (!is_save)
+                    if (System.Windows.MessageBox.Show("Сохранить изменения?", "АРМ Эксперта Редактор",
+                        MessageBoxButton.YesNoCancel) == MessageBoxResult.OK) CommandBinding_Save(null, null);
+                save_path = null;
+                Root = new ObservableCollection<TreeViewModal>();
+                SR = new System.IO.StreamReader(OFD.FileName);
+                string line = SR.ReadLine();
+                int deep;
+                TreeViewModal tmp;
+                while (line != null)
+                {
+                    tmp = Root[0];
+                    deep = Convert.ToInt32(line[0].ToString());
+                    for (int i = 0; i < deep; i++) tmp = tmp.Children.Last();
+                    tmp.Children.Add(new TreeViewModal(line.Remove(0, 2), tmp));
+                }
+                SR.Close();
+
+                is_open = true;
+                is_save = true;
+                history = new List<TreeViewModal>();
+                is_history_begin = true;
+                is_history_end = true;
+            }
+        }
+
+        private void Export_Click(object sender, RoutedEventArgs e)
+        {
+            SFD = new SaveFileDialog();
+            SFD.Filter = "Текстовый файл (*.txt)|*.txt|Все файлы (*.*)|*.*";
+            SFD.RestoreDirectory = true;
+            if (SFD.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                SW = new StreamWriter(SFD.FileName);
+                RecursyExport(Root[0],0);
+                SW.Close();
+            }
+        }
+
+        private void RecursyExport(TreeViewModal root,int level)
+        {
+            foreach (TreeViewModal el in root.Children)
+            {
+                SW.WriteLine(level.ToString() + " " + el.Naim);
+                RecursyExport(el,level+1);
+            }
+        }
+
         private void tree_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
             current = tree.SelectedItem as TreeViewModal;
-            is_select = true;
+            if (current != Root[0]) is_select = true;
         }
 
         private void Add_New_Element(object sender, RoutedEventArgs e)
         {
             current = (sender as System.Windows.Controls.MenuItem).DataContext as TreeViewModal;
-            current.Children.Add(TreeViewModal.NewItem(current));
-            Historian();
-            is_save = false;
+            TreeViewModal tmp = TreeViewModal.NewItem(current);
+            if (tmp.Naim != null)
+            {
+                current.Children.Add(tmp);
+                Historian();
+                NotSave();
+            }
         }
+
         void Historian()
         {
             history.Add(Root[0].Clone);
             is_history_begin = false;
             current_index = history.Count - 1;
-        }
-
-        private void Rename(object sender, RoutedEventArgs e)
-        {
-            WindowForEditNaim WFEN = new WindowForEditNaim(tree.SelectedItem as TreeViewModal);
-            WFEN.ShowDialog();
-            is_save = false;
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -264,9 +350,18 @@ namespace Editor
         {
             if (e.ClickCount == 2)
             {
-                current.IsExpanded = !current.IsExpanded;
-                Rename(null, null);
+                if (is_select)
+                {
+                    current.IsExpanded = !current.IsExpanded;
+                    CommandBinding_Rename(null, null);
+                }
             }
+        }
+
+        void NotSave()
+        {
+            is_save = false;
+            if (windows_title.Title.Last()!='*') windows_title.Title += "*";
         }
     }
 }

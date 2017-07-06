@@ -24,6 +24,11 @@ namespace Editor.Classes
         {
             parent = pparent;
         }
+        public TreeViewModal(string pnaim, TreeViewModal pparent)
+        {
+            naim = pnaim;
+            parent = pparent;
+        }
         public ObservableCollection<TreeViewModal> Children
         {
             get
@@ -40,6 +45,7 @@ namespace Editor.Classes
             set
             {
                 naim = value;
+                OnPropertyChanged("Naim");
             }
         }
         public TreeViewModal Clone
