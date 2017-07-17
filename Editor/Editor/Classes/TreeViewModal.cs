@@ -6,16 +6,16 @@ using System.Threading.Tasks;
 using System.Collections.ObjectModel;
 using Editor.Windows;
 using System.ComponentModel;
+using System.Windows;
 
 namespace Editor.Classes
 {
-    [Serializable]
     public class TreeViewModal:INotifyPropertyChanged
     {
         ObservableCollection<TreeViewModal> children = new ObservableCollection<TreeViewModal>();
         string naim;
         TreeViewModal parent;
-        bool is_expanded;
+        bool is_renamed;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -28,6 +28,12 @@ namespace Editor.Classes
         {
             naim = pnaim;
             parent = pparent;
+        }
+        public TreeViewModal(SaveClass sc,TreeViewModal ppar)
+        {
+            naim = sc.Naim;
+            parent = ppar;
+            foreach (SaveClass cur in sc.Children) children.Add(new TreeViewModal(cur,this));
         }
         public ObservableCollection<TreeViewModal> Children
         {
@@ -80,21 +86,27 @@ namespace Editor.Classes
                 parent = value;
             }
         }
-        public bool IsExpanded
+        public bool IsRenamed
         {
             get
             {
-                return is_expanded;
+                return is_renamed;
             }
             set
             {
-                is_expanded = value;
-                OnPropertyChanged("IsExpanded");
+                is_renamed = value;
             }
         }
         public void OnPropertyChanged(string prop)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
+        }
+        public SaveClass Save
+        {
+            get
+            {
+                return new SaveClass(this);
+            }
         }
     }
 }

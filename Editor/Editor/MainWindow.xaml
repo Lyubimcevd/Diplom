@@ -117,8 +117,7 @@
             </MenuItem>
         </Menu>
         <TreeView x:Name="tree"
-                  Grid.Row="1" 
-                  SelectedItemChanged="tree_SelectedItemChanged">
+                  Grid.Row="1">
             <TreeView.ItemTemplate>
                 <HierarchicalDataTemplate ItemsSource="{Binding Children}">
                     <TextBlock Text="{Binding Naim}"
@@ -128,7 +127,10 @@
             </TreeView.ItemTemplate>
             <TreeView.ItemContainerStyle>
                 <Style TargetType="TreeViewItem">
-                    <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}"/>
+                    <EventSetter Event="Expanded" Handler="TreeViewItemExpanded"/>
+                    <EventSetter Event="Collapsed" Handler="TreeViewItemCollapsed"/>
+                    <EventSetter Event="PreviewMouseRightButtonDown" Handler="TreeViewItemPreviewMouseRightButtonDown"/>
+                    <EventSetter Event="PreviewMouseLeftButtonDown" Handler="TreeViewItemPreviewMouseLeftButtonDown"/>
                 </Style>
             </TreeView.ItemContainerStyle>
         </TreeView>

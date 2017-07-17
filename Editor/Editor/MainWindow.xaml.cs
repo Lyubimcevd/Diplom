@@ -24,6 +24,7 @@ namespace Editor
     public partial class MainWindow : Window
     {
         TreeViewModal buffer,current;
+        TreeViewItem current_item;
         TitleViewModal windows_title;
         List<TreeViewModal> history;
         ObservableCollection<TreeViewModal> Root;
@@ -55,14 +56,20 @@ namespace Editor
 
         void CommandBinding_New(object sender, ExecutedRoutedEventArgs e)
         {
-            Root = new ObservableCollection<TreeViewModal>();
-            Root.Add(new TreeViewModal("Показатели качества",null));
-            windows_title.Title = "АРМ Эксперта Редактор*";        
+            if (!is_save)
+            {
+                MessageBoxResult result = System.Windows.MessageBox.Show("Сохранить изменения?", "АРМ Эксперта Редактор",
+                    MessageBoxButton.YesNoCancel);
+                if (result == MessageBoxResult.Yes) CommandBinding_Save(null, null);
+                if (result == MessageBoxResult.Cancel) return;
+            }          
+            NewTree();
+            windows_title.Title = "АРМ Эксперта Редактор*";
             tree.ItemsSource = Root;
             Historian();
             is_history_begin = true;
             is_open = true;
-            is_save = false;
+            is_save = false;  
         }
 
         void CommandBinding_Open(object sender, ExecutedRoutedEventArgs e)
@@ -81,10 +88,10 @@ namespace Editor
                 using (FileStream fs = new FileStream(save_path, FileMode.OpenOrCreate))
                 {
                     Root = new ObservableCollection<TreeViewModal>();
-                    Root.Add(BF.Deserialize(fs) as TreeViewModal);
+                    Root.Add(new TreeViewModal(BF.Deserialize(fs) as SaveClass,null));
                 }
                 tree.ItemsSource = Root;
-                windows_title.Title = "АРМ Эксперта Редактор:"+OFD.FileName;
+                windows_title.Title = "АРМ Эксперта Редактор: "+OFD.FileName;
 
                 is_open = true;
                 is_save = true;
@@ -119,10 +126,10 @@ namespace Editor
                 save_path = SFD.FileName;
                 using (FileStream fs = new FileStream(save_path, FileMode.OpenOrCreate))
                 {
-                    BF.Serialize(fs, Root[0]);
+                    BF.Serialize(fs, new SaveClass(Root[0]));
                 }
 
-                windows_title.Title = "АРМ Эксперта Редактор:" + SFD.FileName;
+                windows_title.Title = "АРМ Эксперта Редактор: " + SFD.FileName;
 
                 is_save = true;
             }
@@ -167,7 +174,10 @@ namespace Editor
 
         void CommandBinding_Paste(object sender, ExecutedRoutedEventArgs e)
         {
-            current.Children.Add(buffer.Clone);
+            TreeViewModal tmp = buffer.Clone;
+            tmp.Parent = current;
+            current.Children.Add(tmp);
+            current_item.IsExpanded = true;
             Historian();
             NotSave();
         }
@@ -181,14 +191,17 @@ namespace Editor
 
         void CommandBinding_Delete(object sender, ExecutedRoutedEventArgs e)
         {
-            current.Parent.Children.Remove(current);
-            NotSave();
+            if (is_select)
+            {
+                current.Parent.Children.Remove(current);
+                NotSave();
+            }
         }
 
         void CommandBinding_Help(object sender, ExecutedRoutedEventArgs e)
         {
             IE = new SHDocVw.InternetExplorer();    
-            IE.Navigate(System.Windows.Forms.Application.StartupPath + @"Help\Help.html");
+            IE.Navigate(System.Windows.Forms.Application.StartupPath + @"\Help\Help.html");
             IE.Visible = true;
         }
 
@@ -266,12 +279,12 @@ namespace Editor
                     if (System.Windows.MessageBox.Show("Сохранить изменения?", "АРМ Эксперта Редактор",
                         MessageBoxButton.YesNoCancel) == MessageBoxResult.OK) CommandBinding_Save(null, null);
                 save_path = null;
-                Root = new ObservableCollection<TreeViewModal>();
+                NewTree();
                 SR = new System.IO.StreamReader(OFD.FileName);
-                string line = SR.ReadLine();
+                string line;
                 int deep;
                 TreeViewModal tmp;
-                while (line != null)
+                while ((line = SR.ReadLine()) != null)
                 {
                     tmp = Root[0];
                     deep = Convert.ToInt32(line[0].ToString());
@@ -279,6 +292,7 @@ namespace Editor
                     tmp.Children.Add(new TreeViewModal(line.Remove(0, 2), tmp));
                 }
                 SR.Close();
+                tree.ItemsSource = Root;
 
                 is_open = true;
                 is_save = true;
@@ -310,9 +324,37 @@ namespace Editor
             }
         }
 
-        private void tree_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        private void TreeViewItemExpanded(object sender, RoutedEventArgs e)
         {
-            current = tree.SelectedItem as TreeViewModal;
+            current = (sender as TreeViewItem).DataContext as TreeViewModal;
+            if (current.IsRenamed)
+            {
+                current.IsRenamed = false;
+                (sender as TreeViewItem).IsExpanded = false;
+            }
+            e.Handled = true;
+        }
+
+        private void TreeViewItemCollapsed(object sender, RoutedEventArgs e)
+        {
+            current = (sender as TreeViewItem).DataContext as TreeViewModal;
+            if (current.IsRenamed)
+            {
+                current.IsRenamed = false;
+                (sender as TreeViewItem).IsExpanded = true;
+            }
+            e.Handled = true;
+        }
+
+        private void TreeViewItemPreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            current_item = sender as TreeViewItem;
+        }
+
+        private void TreeViewItemPreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            current_item = sender as TreeViewItem;
+            current = (sender as TreeViewItem).DataContext as TreeViewModal;
             if (current != Root[0]) is_select = true;
         }
 
@@ -323,6 +365,7 @@ namespace Editor
             if (tmp.Naim != null)
             {
                 current.Children.Add(tmp);
+                current_item.IsExpanded = true;
                 Historian();
                 NotSave();
             }
@@ -341,7 +384,7 @@ namespace Editor
             {
                 MessageBoxResult result = System.Windows.MessageBox.Show("Сохранить изменения?", "АРМ Эксперта Редактор",
                     MessageBoxButton.YesNoCancel);
-                if (result == MessageBoxResult.OK) CommandBinding_Save(null, null);
+                if (result == MessageBoxResult.Yes) CommandBinding_Save(null, null);
                 if (result == MessageBoxResult.Cancel) e.Cancel = true;
             }
         }
@@ -349,19 +392,23 @@ namespace Editor
         private void Rename_DoubleClick(object sender, MouseButtonEventArgs e)
         {
             if (e.ClickCount == 2)
-            {
                 if (is_select)
                 {
-                    current.IsExpanded = !current.IsExpanded;
                     CommandBinding_Rename(null, null);
+                    current.IsRenamed = true;
                 }
-            }
         }
 
         void NotSave()
         {
             is_save = false;
             if (windows_title.Title.Last()!='*') windows_title.Title += "*";
+        }
+
+        void NewTree()
+        {
+            Root = new ObservableCollection<TreeViewModal>();
+            Root.Add(new TreeViewModal("Показатели качества", null));
         }
     }
 }

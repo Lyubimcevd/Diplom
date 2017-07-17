@@ -17,3 +17,7 @@ D:\Diplom\Editor\Editor\obj\Debug\Interop.SHDocVw.dll
 D:\Diplom\Editor\Editor\obj\Debug\Editor.csproj.ResolveComReference.cache
 D:\Diplom\Editor\Editor\obj\Debug\Editor.Windows.AboutBox.resources
 D:\Diplom\Editor\Editor\obj\Debug\Editor.csprojResolveAssemblyReference.cache
+D:\Diplom\Editor\Editor\bin\Debug\Editor.exe.manifest
+D:\Diplom\Editor\Editor\bin\Debug\Editor.application
+D:\Diplom\Editor\Editor\obj\Debug\Editor.exe.manifest
+D:\Diplom\Editor\Editor\obj\Debug\Editor.application
