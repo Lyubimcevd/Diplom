@@ -16,7 +16,7 @@ using System.Collections.ObjectModel;
 using Editor.Classes;
 using Editor.Windows;
 using System.Windows.Forms;
-using System.Runtime.Serialization.Formatters.Binary;
+using System.Runtime.Serialization.Json;
 using System.IO;
 
 namespace Editor
@@ -30,7 +30,7 @@ namespace Editor
         ObservableCollection<TreeViewModal> Root;
         OpenFileDialog OFD;
         SaveFileDialog SFD;
-        BinaryFormatter BF;
+        DataContractJsonSerializer BF;
         SHDocVw.InternetExplorer IE;
         AboutBox AB;
         StreamWriter SW;
@@ -84,11 +84,11 @@ namespace Editor
                     if (System.Windows.MessageBox.Show("Сохранить изменения?", "АРМ Эксперта Редактор",
                         MessageBoxButton.YesNoCancel) == MessageBoxResult.OK) CommandBinding_Save(null, null);
                 save_path = OFD.FileName;
-                BF = new BinaryFormatter();
-                using (FileStream fs = new FileStream(save_path, FileMode.OpenOrCreate))
+                BF = new DataContractJsonSerializer(typeof(SaveClass));
+                using (FileStream fs = new FileStream(save_path, FileMode.Open))
                 {
                     Root = new ObservableCollection<TreeViewModal>();
-                    Root.Add(new TreeViewModal(BF.Deserialize(fs) as SaveClass,null));
+                    Root.Add(new TreeViewModal(BF.ReadObject(fs) as SaveClass,null));
                 }
                 tree.ItemsSource = Root;
                 windows_title.Title = "АРМ Эксперта Редактор: "+OFD.FileName;
@@ -103,13 +103,13 @@ namespace Editor
 
         void CommandBinding_Save(object sender, ExecutedRoutedEventArgs e)
         {
-            BF = new BinaryFormatter();
+            BF = new DataContractJsonSerializer(typeof(SaveClass));   
             if (save_path == null) CommandBinding_SaveAs(null, null);
             else
             {
                 using (FileStream fs = new FileStream(save_path, FileMode.OpenOrCreate))
                 {
-                    BF.Serialize(fs, Root[0]);
+                    BF.WriteObject(fs, Root[0].Save);
                 }
                 is_save = true;
             }
@@ -117,7 +117,7 @@ namespace Editor
 
         void CommandBinding_SaveAs(object sender, ExecutedRoutedEventArgs e)
         {
-            BF = new BinaryFormatter();           
+            BF = new DataContractJsonSerializer(typeof(SaveClass));
             SFD = new SaveFileDialog();
             SFD.Filter = "ГОСТ (*.gstx)|*.gstx|Все файлы (*.*)|*.*";
             SFD.RestoreDirectory = true;
@@ -126,7 +126,7 @@ namespace Editor
                 save_path = SFD.FileName;
                 using (FileStream fs = new FileStream(save_path, FileMode.OpenOrCreate))
                 {
-                    BF.Serialize(fs, new SaveClass(Root[0]));
+                    BF.WriteObject(fs,Root[0].Save);
                 }
 
                 windows_title.Title = "АРМ Эксперта Редактор: " + SFD.FileName;

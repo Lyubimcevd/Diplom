@@ -1,0 +1,68 @@
+﻿<Window x:Class="Assessor.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Assessor"
+        mc:Ignorable="d"
+        Title="MainWindow" 
+        Height="350" 
+        Width="525">
+    <Window.CommandBindings>
+        <CommandBinding Command="New" 
+                        Executed="CommandBinding_New"/>
+        <CommandBinding Command="Open" 
+                        Executed="CommandBinding_Open"/>
+        <CommandBinding Command="Save" 
+                        Executed="CommandBinding_Save"
+                        CanExecute="Save_CanExecute"/>
+        <CommandBinding Command="SaveAs" 
+                        Executed="CommandBinding_SaveAs"
+                        CanExecute="SaveAs_CanExecute"/>
+    </Window.CommandBindings>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <Menu>
+            <MenuItem Header="Файл">
+                <MenuItem Header="Новая модель оценки" 
+                          Command="New"/>
+                <MenuItem Header="Открыть модель оценки" 
+                          Command="Open"/>
+                <MenuItem Header="Сохранить" 
+                          Command="Save"/>
+                <MenuItem Header="Сохранить как..." 
+                          Command="SaveAs"/>
+                <MenuItem Header="Выход"
+                          Command="Close"/>
+            </MenuItem>
+            <ComboBox Width="150" 
+                      SelectedIndex="0">
+                <ComboBoxItem Content="Эксперт"/>
+                <ComboBoxItem Content="Администратор"/>
+            </ComboBox>
+        </Menu>
+        <TreeView x:Name="tree"
+                  Grid.Row="1">
+            <TreeView.ItemTemplate>
+                <HierarchicalDataTemplate ItemsSource="{Binding Children}">
+                    <TextBlock Text="{Binding Naim}" 
+                               PreviewMouseLeftButtonDown="TextBlock_PreviewMouseLeftButtonDown"/>
+                </HierarchicalDataTemplate>
+            </TreeView.ItemTemplate>
+            <TreeView.ItemContainerStyle>
+                <Style TargetType="TreeViewItem">
+                    <EventSetter Event="Expanded" 
+                                 Handler="TreeViewItemExpanded"/>
+                    <EventSetter Event="Collapsed" 
+                                 Handler="TreeViewItemCollapsed"/>
+                </Style>
+            </TreeView.ItemContainerStyle>
+        </TreeView>
+    </Grid>
+</Window>

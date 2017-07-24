@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Collections.ObjectModel;
 using System.Runtime.Serialization;
 
-namespace Editor.Classes
+namespace Assessor.Classes
 {
     [DataContract]
     public class SaveClass
@@ -16,11 +16,6 @@ namespace Editor.Classes
         [DataMember]
         string naim;
 
-        public SaveClass(TreeViewModal psave)
-        {
-            naim = psave.Naim;
-            foreach (TreeViewModal mod in psave.Children) children.Add(mod.Save);
-        }
         public string Naim
         {
             get
