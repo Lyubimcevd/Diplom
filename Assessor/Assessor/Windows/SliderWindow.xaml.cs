@@ -11,17 +11,29 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using Assessor.Classes;
 
 namespace Assessor.Windows
 {
-    /// <summary>
-    /// Логика взаимодействия для SliderWindow.xaml
-    /// </summary>
     public partial class SliderWindow : Window
     {
-        public SliderWindow()
+        TreeViewExpertModal current;
+        public SliderWindow(TreeViewExpertModal pcurrent)
         {
             InitializeComponent();
+            current = pcurrent;
+            this.DataContext = current;
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (current.Children.Count == 0) current.Is_Ready = true;
+            current.Parent.ChangeRightBorder();
+        }
+
+        private void TextBox_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter) this.Close();
         }
     }
 }

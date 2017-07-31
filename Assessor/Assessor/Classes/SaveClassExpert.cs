@@ -4,14 +4,18 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Collections.ObjectModel;
+using System.Runtime.Serialization;
 
 namespace Assessor.Classes
 {
-    [Serializable]
+    [DataContract]
     public class SaveClassExpert
     {
+        [DataMember]
         ObservableCollection<SaveClassExpert> children = new ObservableCollection<SaveClassExpert>();
+        [DataMember]
         string naim;
+        [DataMember]
         int expert_opinion, coeff_import;
 
         public SaveClassExpert(TreeViewExpertModal psave)

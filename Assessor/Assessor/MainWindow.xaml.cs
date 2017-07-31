@@ -29,27 +29,41 @@ namespace Assessor
         OpenFileDialog OFD;
         SaveFileDialog SFD;
         DataContractJsonSerializer BF;
+        SHDocVw.InternetExplorer IE;
+        AboutBox AB;
         string save_path;
         bool is_save = true,
-            is_open = false;
+             is_open = false,
+             cancel_combo_box = true;
+        int type_open_file; //1 - gstx, 2 - gstm, 3 - gstme
 
         public MainWindow()
         {
             InitializeComponent();
             windows_title = new TitleViewModal("АРМ Эксперта Оценщик");
             this.DataContext = windows_title;
+            WorkMode.IsExpert = true;
         }
 
         void CommandBinding_New(object sender, ExecutedRoutedEventArgs e)
         {
             OFD = new OpenFileDialog();
-            OFD.Filter = "ГОСТ (*.gstx)|*.gstx|Все файлы (*.*)|*.*";
+            if (WorkMode.IsExpert)
+            {
+                OFD.Filter = "ГОСТ (*.gstm)|*.gstm|Все файлы (*.*)|*.*";
+                type_open_file = 2;
+            }
+            else
+            {
+                OFD.Filter = "ГОСТ (*.gstx)|*.gstx|Все файлы (*.*)|*.*";
+                type_open_file = 1;
+            }    
             OFD.RestoreDirectory = true;
 
             if (OFD.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 if (!is_save)
-                    if (System.Windows.MessageBox.Show("Сохранить изменения?", "АРМ Эксперта Оценщик",
+                    if (System.Windows.MessageBox.Show("Сохранить изменения?", "АРМ Эксперта Оценка",
                         MessageBoxButton.YesNoCancel) == MessageBoxResult.OK) CommandBinding_Save(null, null);
                 save_path = OFD.FileName;
                 BF = new DataContractJsonSerializer(typeof(SaveClass));
@@ -59,7 +73,7 @@ namespace Assessor
                     Root.Add(new TreeViewExpertModal(BF.ReadObject(fs) as SaveClass, null));
                 }
                 tree.ItemsSource = Root;
-                windows_title.Title = "АРМ Эксперта Оценщик: " + OFD.FileName;
+                windows_title.Title = "АРМ Эксперта Оценка: " + OFD.FileName;
 
                 is_open = true;
                 is_save = true;
@@ -69,23 +83,31 @@ namespace Assessor
         void CommandBinding_Open(object sender, ExecutedRoutedEventArgs e)
         {
             OFD = new OpenFileDialog();
-            OFD.Filter = "ГОСТ (*.gstm)|*.gstm|Все файлы (*.*)|*.*";
+            if (WorkMode.IsExpert)
+            {
+                OFD.Filter = "ГОСТ (*.gstme)|*.gstme|Все файлы (*.*)|*.*";
+                type_open_file = 3;
+            }
+            else
+            {
+                OFD.Filter = "ГОСТ (*.gstm)|*.gstm|Все файлы (*.*)|*.*";
+                type_open_file = 2;
+            }
             OFD.RestoreDirectory = true;
-
             if (OFD.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 if (!is_save)
-                    if (System.Windows.MessageBox.Show("Сохранить изменения?", "АРМ Эксперта Оценщик",
+                    if (System.Windows.MessageBox.Show("Сохранить изменения?", "АРМ Эксперта Оценка",
                         MessageBoxButton.YesNoCancel) == MessageBoxResult.OK) CommandBinding_Save(null, null);
                 save_path = OFD.FileName;
-                BF = new DataContractJsonSerializer(typeof(SaveClass));
+                BF = new DataContractJsonSerializer(typeof(SaveClassExpert));
                 using (FileStream fs = new FileStream(save_path, FileMode.Open))
                 {
                     Root = new ObservableCollection<TreeViewExpertModal>();
                     Root.Add(new TreeViewExpertModal(BF.ReadObject(fs) as SaveClassExpert, null));
                 }
                 tree.ItemsSource = Root;
-                windows_title.Title = "АРМ Эксперта Оценщик: " + OFD.FileName;
+                windows_title.Title = "АРМ Эксперта Оценка: " + OFD.FileName;
 
                 is_open = true;
                 is_save = true;
@@ -94,35 +116,40 @@ namespace Assessor
 
         void CommandBinding_Save(object sender, ExecutedRoutedEventArgs e)
         {
-            BF = new DataContractJsonSerializer(typeof(SaveClass));
-            if (save_path == null) CommandBinding_SaveAs(null, null);
+            BF = new DataContractJsonSerializer(typeof(SaveClassExpert));
+            if (WorkMode.IsExpert)
+                if (type_open_file == 2) CommandBinding_SaveAs(null, null);
+                else SaveInFile();
             else
-            {
-                using (FileStream fs = new FileStream(save_path, FileMode.OpenOrCreate))
-                {
-                    BF.WriteObject(fs, Root[0].Save);
-                }
-                is_save = true;
-            }
+                if (type_open_file == 1) CommandBinding_SaveAs(null, null);
+                else SaveInFile();
         }
 
         void CommandBinding_SaveAs(object sender, ExecutedRoutedEventArgs e)
         {
-            BF = new DataContractJsonSerializer(typeof(SaveClass));
+            BF = new DataContractJsonSerializer(typeof(SaveClassExpert));
             SFD = new SaveFileDialog();
-            SFD.Filter = "ГОСТ (*.gstm)|*.gstm|Все файлы (*.*)|*.*";
+            if (type_open_file == 1) SFD.Filter = "ГОСТ (*.gstm)|*.gstm|Все файлы (*.*)|*.*";
+            else SFD.Filter = "ГОСТ (*.gstme)|*.gstme|Все файлы (*.*)|*.*";
             SFD.RestoreDirectory = true;
             if (SFD.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 save_path = SFD.FileName;
-                using (FileStream fs = new FileStream(save_path, FileMode.OpenOrCreate))
+                using (FileStream fs = new FileStream(save_path, FileMode.Create))
                 {
                     BF.WriteObject(fs, Root[0].Save);
                 }
-                windows_title.Title = "АРМ Эксперта Оценщик: " + SFD.FileName;
+                windows_title.Title = "АРМ Эксперта Оценка: " + SFD.FileName;
 
                 is_save = true;
             }
+        }
+
+        void CommandBinding_Help(object sender, ExecutedRoutedEventArgs e)
+        {
+            IE = new SHDocVw.InternetExplorer();
+            IE.Navigate(System.Windows.Forms.Application.StartupPath + @"\Help\Help.html");
+            IE.Visible = true;
         }
 
         private void Save_CanExecute(object sender, CanExecuteRoutedEventArgs e)
@@ -157,16 +184,59 @@ namespace Assessor
             e.Handled = true;
         }
 
+        private void About_Click(object sender, RoutedEventArgs e)
+        {
+            AB = new AboutBox();
+            AB.ShowDialog();
+        }
+
+        private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (cancel_combo_box)
+                if (is_open)
+                {
+                    MessageBoxResult result = System.Windows.MessageBox.Show("При смене режима работы будет закрыт текущий файл без сохранения. Продолжить?", "АРМ Эксперта Оценка", MessageBoxButton.YesNoCancel);
+                    if (result == MessageBoxResult.Yes) CloseCurrentFile();
+                    else
+                    {
+                        cancel_combo_box = false;
+                        (sender as System.Windows.Controls.ComboBox).SelectedItem = e.RemovedItems[0];
+                        return;
+                    }
+                }
+                if ((sender as System.Windows.Controls.ComboBox).Text == "Администратор") WorkMode.IsExpert = true;
+                else WorkMode.IsExpert = false;
+            cancel_combo_box = true;
+        }
+
         private void TextBlock_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             current = (sender as TextBlock).DataContext as TreeViewExpertModal;
             if (e.ClickCount == 2)
             {
-                SliderWindow SW = new SliderWindow();
-                SW.main.DataContext = current;
+                SliderWindow SW = new SliderWindow(current);
                 SW.ShowDialog();
                 current.IsDoubleClick = true;
+                is_save = false;
             }
+        }
+
+        void CloseCurrentFile()
+        {
+            windows_title.Title = "АРМ Эксперта Оценка";
+            Root.Clear();
+            save_path = null;
+            is_open = false;
+            is_save = true;
+        }
+
+        void SaveInFile()
+        {
+            using (FileStream fs = new FileStream(save_path, FileMode.Create))
+            {
+                BF.WriteObject(fs, Root[0].Save);
+            }
+            is_save = true;
         }
     }
 }

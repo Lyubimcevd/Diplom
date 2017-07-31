@@ -19,6 +19,8 @@
         <CommandBinding Command="SaveAs" 
                         Executed="CommandBinding_SaveAs"
                         CanExecute="SaveAs_CanExecute"/>
+        <CommandBinding Command="Help" 
+                        Executed="CommandBinding_Help"/>
     </Window.CommandBindings>
     <Grid>
         <Grid.RowDefinitions>
@@ -42,17 +44,25 @@
                           Command="Close"/>
             </MenuItem>
             <ComboBox Width="150" 
-                      SelectedIndex="0">
+                      SelectedIndex="0" 
+                      SelectionChanged="ComboBox_SelectionChanged">
                 <ComboBoxItem Content="Эксперт"/>
                 <ComboBoxItem Content="Администратор"/>
             </ComboBox>
+            <MenuItem Header="Справка">
+                <MenuItem Header="Просмотр справки" 
+                          Command="Help"/>
+                <MenuItem Header="О программе АРМ Эксперта Оценка" 
+                          Click="About_Click"/>
+            </MenuItem>
         </Menu>
         <TreeView x:Name="tree"
                   Grid.Row="1">
             <TreeView.ItemTemplate>
                 <HierarchicalDataTemplate ItemsSource="{Binding Children}">
-                    <TextBlock Text="{Binding Naim}" 
-                               PreviewMouseLeftButtonDown="TextBlock_PreviewMouseLeftButtonDown"/>
+                    <TextBlock Text="{Binding NaimForScreen}" 
+                               PreviewMouseLeftButtonDown="TextBlock_PreviewMouseLeftButtonDown"
+                               Foreground="{Binding Color}"/>
                 </HierarchicalDataTemplate>
             </TreeView.ItemTemplate>
             <TreeView.ItemContainerStyle>

@@ -68,6 +68,7 @@ namespace Editor
             tree.ItemsSource = Root;
             Historian();
             is_history_begin = true;
+            is_history_end = true;
             is_open = true;
             is_save = false;  
         }
@@ -96,6 +97,7 @@ namespace Editor
                 is_open = true;
                 is_save = true;
                 history = new List<TreeViewModal>();
+                Historian();
                 is_history_begin = true;
                 is_history_end = true;
             }
@@ -107,11 +109,12 @@ namespace Editor
             if (save_path == null) CommandBinding_SaveAs(null, null);
             else
             {
-                using (FileStream fs = new FileStream(save_path, FileMode.OpenOrCreate))
+                using (FileStream fs = new FileStream(save_path, FileMode.Create))
                 {
                     BF.WriteObject(fs, Root[0].Save);
                 }
                 is_save = true;
+                windows_title.Title = windows_title.Title.Remove(windows_title.Title.Length - 1);
             }
         }
 
@@ -124,7 +127,7 @@ namespace Editor
             if (SFD.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 save_path = SFD.FileName;
-                using (FileStream fs = new FileStream(save_path, FileMode.OpenOrCreate))
+                using (FileStream fs = new FileStream(save_path, FileMode.Create))
                 {
                     BF.WriteObject(fs,Root[0].Save);
                 }
@@ -194,6 +197,7 @@ namespace Editor
             if (is_select)
             {
                 current.Parent.Children.Remove(current);
+                Historian();
                 NotSave();
             }
         }
@@ -295,7 +299,7 @@ namespace Editor
                 tree.ItemsSource = Root;
 
                 is_open = true;
-                is_save = true;
+                NotSave();
                 history = new List<TreeViewModal>();
                 is_history_begin = true;
                 is_history_end = true;
