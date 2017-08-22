@@ -12,7 +12,7 @@ namespace Assessor.Classes
     public class TreeViewExpertModal:INotifyPropertyChanged
     {
         ObservableCollection<TreeViewExpertModal> children = new ObservableCollection<TreeViewExpertModal>();
-        string naim,color = "Black";
+        string naim;
         TreeViewExpertModal parent;
         int expert_opinion,coeff_import,max = 100;
         bool is_doubleclick,is_ready = false;
@@ -26,6 +26,8 @@ namespace Assessor.Classes
             coeff_import = sc.CoeffImport;
             parent = ppar;
             foreach (SaveClassExpert cur in sc.Children) children.Add(new TreeViewExpertModal(cur,this));
+            if (Children.Count != 0) ChangeRightBorder();
+            else Is_Ready = true;
         }
         public TreeViewExpertModal(SaveClass sc, TreeViewExpertModal ppar)
         {
@@ -49,14 +51,6 @@ namespace Assessor.Classes
             set
             {
                 naim = value;
-            }
-        }
-        public string NaimForScreen
-        {
-            get
-            {
-                if (Is_Ready) return naim + " (готов)";
-                else return naim;             
             }
         }
         public int ExpertOpinion
@@ -90,10 +84,13 @@ namespace Assessor.Classes
             }
             set
             {
+                if (value > max)
+                {
+                    MessageBox.Show("Максимально возможное значение: " + max, "АРМ Эксперта Оценка");
+                    value = max;
+                }
                 if (WorkMode.IsExpert) expert_opinion = value;
                 else coeff_import = value;
-                color = "Green";
-                OnPropertyChanged("Color");
                 OnPropertyChanged("ValueForSlider");
             }
         }
@@ -129,13 +126,16 @@ namespace Assessor.Classes
             set
             {
                 is_ready = value;
+                OnPropertyChanged("Color");
+                OnPropertyChanged("NaimForScreen");
             }
         }
         public string Color
         {
             get
             {
-                return color;
+                if (Is_Ready) return "green";
+                else return "black";
             }
         }
         public TreeViewExpertModal Parent
@@ -162,20 +162,16 @@ namespace Assessor.Classes
         }
         public void ChangeRightBorder()
         {
-            int sum = 100,ready_count = 0;
+            int sum = 100;
+            bool is_all_ready = true;
             foreach (TreeViewExpertModal modal in Children)
             {
                 sum -= modal.ValueForSlider;
-                if (modal.Is_Ready) ready_count++;
+                if (!modal.Is_Ready) is_all_ready = false;
             }
             foreach (TreeViewExpertModal modal in Children) modal.Max = sum + modal.ValueForSlider;
-            if ((sum == 0) && (ready_count == Children.Count)) Is_Ready = true;
+            if ((sum == 0) && is_all_ready) Is_Ready = true;
             else Is_Ready = false;
-            OnPropertyChanged("NaimForScreen");
-        }
-        public void UpdateSlider()
-        {
-            OnPropertyChanged("ValueForSlider");
         }
     }
 }

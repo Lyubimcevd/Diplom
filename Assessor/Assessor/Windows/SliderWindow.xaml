@@ -18,6 +18,9 @@
                 Maximum="{Binding Max}"
                 Minimum="0"/>
         <TextBox Grid.Column="1" 
-                 Text="{Binding ValueForSlider,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" PreviewKeyDown="TextBox_PreviewKeyDown"/>
+                 Text="{Binding ValueForSlider,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" 
+                 PreviewKeyDown="TextBox_PreviewKeyDown"
+                 x:Name="text_box" 
+                 GotFocus="text_box_GotFocus"/>
     </Grid>
 </Window>

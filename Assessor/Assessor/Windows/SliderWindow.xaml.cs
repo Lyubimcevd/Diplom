@@ -23,6 +23,7 @@ namespace Assessor.Windows
             InitializeComponent();
             current = pcurrent;
             this.DataContext = current;
+            Loaded += delegate { text_box.Focus(); };
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -34,6 +35,11 @@ namespace Assessor.Windows
         private void TextBox_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter) this.Close();
+        }
+
+        private void text_box_GotFocus(object sender, RoutedEventArgs e)
+        {
+            text_box.SelectAll();
         }
     }
 }

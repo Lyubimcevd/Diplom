@@ -60,7 +60,7 @@
                   Grid.Row="1">
             <TreeView.ItemTemplate>
                 <HierarchicalDataTemplate ItemsSource="{Binding Children}">
-                    <TextBlock Text="{Binding NaimForScreen}" 
+                    <TextBlock Text="{Binding Naim}" 
                                PreviewMouseLeftButtonDown="TextBlock_PreviewMouseLeftButtonDown"
                                Foreground="{Binding Color}"/>
                 </HierarchicalDataTemplate>
