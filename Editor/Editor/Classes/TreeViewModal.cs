@@ -50,8 +50,15 @@ namespace Editor.Classes
             }
             set
             {
-                naim = value;
-                OnPropertyChanged("Naim");
+                if (value != null)
+                {
+                    if (value.Length == 0) MessageBox.Show("Поле не заполнено", "АРМ Эксперта Редактор");
+                    else
+                    {
+                        naim = value;
+                        OnPropertyChanged("Naim");
+                    }
+                }
             }
         }
         public TreeViewModal Clone

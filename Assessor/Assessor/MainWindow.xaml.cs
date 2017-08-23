@@ -31,11 +31,12 @@ namespace Assessor
         DataContractJsonSerializer BF;
         SHDocVw.InternetExplorer IE;
         AboutBox AB;
+        MessageBoxResult result;
         string save_path;
         bool is_save = true,
              is_open = false,
-             cancel_combo_box = true;
-        int type_open_file; //1 - gstx, 2 - gstm, 3 - gstme
+             cancel_combo_box = true,
+             open_file = false;
 
         public MainWindow()
         {
@@ -48,23 +49,20 @@ namespace Assessor
         void CommandBinding_New(object sender, ExecutedRoutedEventArgs e)
         {
             OFD = new OpenFileDialog();
-            if (WorkMode.IsExpert)
-            {
-                OFD.Filter = "ГОСТ (*.gstm)|*.gstm|Все файлы (*.*)|*.*";
-                type_open_file = 2;
-            }
-            else
-            {
-                OFD.Filter = "ГОСТ (*.gstx)|*.gstx|Все файлы (*.*)|*.*";
-                type_open_file = 1;
-            }    
+            if (WorkMode.IsExpert) OFD.Filter = "ГОСТ (*.gstm)|*.gstm|Все файлы (*.*)|*.*";
+            else OFD.Filter = "ГОСТ (*.gstx)|*.gstx|Все файлы (*.*)|*.*";
+            open_file = false;
             OFD.RestoreDirectory = true;
 
             if (OFD.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 if (!is_save)
-                    if (System.Windows.MessageBox.Show("Сохранить изменения?", "АРМ Эксперта Оценка",
-                        MessageBoxButton.YesNoCancel) == MessageBoxResult.OK) CommandBinding_Save(null, null);
+                {
+                    result = System.Windows.MessageBox.Show("Сохранить изменения?", "АРМ Эксперта Оценка",
+                        MessageBoxButton.YesNoCancel);
+                    if (result == MessageBoxResult.OK) CommandBinding_Save(null, null);
+                    if (result == MessageBoxResult.Cancel) return;
+                }
                 save_path = OFD.FileName;
                 BF = new DataContractJsonSerializer(typeof(SaveClass));
                 using (FileStream fs = new FileStream(save_path, FileMode.Open))
@@ -83,22 +81,18 @@ namespace Assessor
         void CommandBinding_Open(object sender, ExecutedRoutedEventArgs e)
         {
             OFD = new OpenFileDialog();
-            if (WorkMode.IsExpert)
-            {
-                OFD.Filter = "ГОСТ (*.gstme)|*.gstme|Все файлы (*.*)|*.*";
-                type_open_file = 3;
-            }
-            else
-            {
-                OFD.Filter = "ГОСТ (*.gstm)|*.gstm|Все файлы (*.*)|*.*";
-                type_open_file = 2;
-            }
+            if (WorkMode.IsExpert) OFD.Filter = "ГОСТ (*.gstme)|*.gstme|Все файлы (*.*)|*.*";
+            else OFD.Filter = "ГОСТ (*.gstm)|*.gstm|Все файлы (*.*)|*.*";
+            open_file = true;
             OFD.RestoreDirectory = true;
             if (OFD.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 if (!is_save)
-                    if (System.Windows.MessageBox.Show("Сохранить изменения?", "АРМ Эксперта Оценка",
-                        MessageBoxButton.YesNoCancel) == MessageBoxResult.OK) CommandBinding_Save(null, null);
+                {
+                    result = System.Windows.MessageBox.Show("Сохранить изменения?", "АРМ Эксперта Оценка", MessageBoxButton.YesNoCancel);
+                    if (result == MessageBoxResult.OK) CommandBinding_Save(null, null);
+                    if (result == MessageBoxResult.Cancel) return;
+                }
                 save_path = OFD.FileName;
                 BF = new DataContractJsonSerializer(typeof(SaveClassExpert));
                 using (FileStream fs = new FileStream(save_path, FileMode.Open))
@@ -118,10 +112,10 @@ namespace Assessor
         {
             BF = new DataContractJsonSerializer(typeof(SaveClassExpert));
             if (WorkMode.IsExpert)
-                if (type_open_file == 2) CommandBinding_SaveAs(null, null);
+                if (!open_file) CommandBinding_SaveAs(null, null);
                 else SaveInFile();
             else
-                if (type_open_file == 1) CommandBinding_SaveAs(null, null);
+                if (!open_file) CommandBinding_SaveAs(null, null);
                 else SaveInFile();
         }
 
@@ -129,19 +123,13 @@ namespace Assessor
         {
             BF = new DataContractJsonSerializer(typeof(SaveClassExpert));
             SFD = new SaveFileDialog();
-            if (type_open_file == 1) SFD.Filter = "ГОСТ (*.gstm)|*.gstm|Все файлы (*.*)|*.*";
-            else SFD.Filter = "ГОСТ (*.gstme)|*.gstme|Все файлы (*.*)|*.*";
+            if (WorkMode.IsExpert) SFD.Filter = "ГОСТ (*.gstme)|*.gstme|Все файлы (*.*)|*.*";
+            else SFD.Filter = "ГОСТ (*.gstm)|*.gstm|Все файлы (*.*)|*.*";
             SFD.RestoreDirectory = true;
             if (SFD.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 save_path = SFD.FileName;
-                using (FileStream fs = new FileStream(save_path, FileMode.Create))
-                {
-                    BF.WriteObject(fs, Root[0].Save);
-                }
-                windows_title.Title = "АРМ Эксперта Оценка: " + SFD.FileName;
-
-                is_save = true;
+                SaveInFile();
             }
         }
 
@@ -195,7 +183,7 @@ namespace Assessor
             if (cancel_combo_box)
                 if (is_open)
                 {
-                    MessageBoxResult result = System.Windows.MessageBox.Show("При смене режима работы будет закрыт текущий файл без сохранения. Продолжить?", "АРМ Эксперта Оценка", MessageBoxButton.YesNoCancel);
+                    result = System.Windows.MessageBox.Show("При смене режима работы будет закрыт текущий файл без сохранения. Продолжить?", "АРМ Эксперта Оценка", MessageBoxButton.YesNoCancel);
                     if (result == MessageBoxResult.Yes) CloseCurrentFile();
                     else
                     {
@@ -207,6 +195,16 @@ namespace Assessor
                 if ((sender as System.Windows.Controls.ComboBox).Text == "Администратор") WorkMode.IsExpert = true;
                 else WorkMode.IsExpert = false;
             cancel_combo_box = true;
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (!is_save)
+            {
+                result = System.Windows.MessageBox.Show("Сохранить изменения?", "АРМ Эксперта Оценка", MessageBoxButton.YesNoCancel);
+                if (result == MessageBoxResult.OK) CommandBinding_Save(null, null);
+                if (result == MessageBoxResult.Cancel) e.Cancel = true;
+            }
         }
 
         private void TextBlock_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -236,6 +234,7 @@ namespace Assessor
             {
                 BF.WriteObject(fs, Root[0].Save);
             }
+            windows_title.Title = "АРМ Эксперта Оценка: " + save_path;
             is_save = true;
         }
     }

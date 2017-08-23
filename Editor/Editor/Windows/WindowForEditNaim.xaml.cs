@@ -41,5 +41,10 @@ namespace Editor.Windows
         {
             if (!is_button) textbox.Text = null;
         }
+
+        private void textbox_GotFocus(object sender, RoutedEventArgs e)
+        {
+            textbox.SelectAll();
+        }
     }
 }

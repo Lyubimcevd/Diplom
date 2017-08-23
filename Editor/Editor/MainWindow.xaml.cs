@@ -35,6 +35,7 @@ namespace Editor
         AboutBox AB;
         StreamWriter SW;
         StreamReader SR;
+        MessageBoxResult result;
         string save_path;
         int current_index;
         bool is_buffer = false,
@@ -58,8 +59,7 @@ namespace Editor
         {
             if (!is_save)
             {
-                MessageBoxResult result = System.Windows.MessageBox.Show("Сохранить изменения?", "АРМ Эксперта Редактор",
-                    MessageBoxButton.YesNoCancel);
+                result = System.Windows.MessageBox.Show("Сохранить изменения?", "АРМ Эксперта Редактор",MessageBoxButton.YesNoCancel);
                 if (result == MessageBoxResult.Yes) CommandBinding_Save(null, null);
                 if (result == MessageBoxResult.Cancel) return;
             }          
@@ -80,10 +80,13 @@ namespace Editor
             OFD.RestoreDirectory = true;
 
             if (OFD.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-            {               
+            {
                 if (!is_save)
-                    if (System.Windows.MessageBox.Show("Сохранить изменения?", "АРМ Эксперта Редактор",
-                        MessageBoxButton.YesNoCancel) == MessageBoxResult.OK) CommandBinding_Save(null, null);
+                {
+                    result = System.Windows.MessageBox.Show("Сохранить изменения?", "АРМ Эксперта Редактор",MessageBoxButton.YesNoCancel);
+                    if (result == MessageBoxResult.OK) CommandBinding_Save(null, null);
+                    if (result == MessageBoxResult.Cancel) return;
+                }
                 save_path = OFD.FileName;
                 BF = new DataContractJsonSerializer(typeof(SaveClass));
                 using (FileStream fs = new FileStream(save_path, FileMode.Open))
@@ -280,8 +283,11 @@ namespace Editor
             if (OFD.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 if (!is_save)
-                    if (System.Windows.MessageBox.Show("Сохранить изменения?", "АРМ Эксперта Редактор",
-                        MessageBoxButton.YesNoCancel) == MessageBoxResult.OK) CommandBinding_Save(null, null);
+                {
+                    result = System.Windows.MessageBox.Show("Сохранить изменения?", "АРМ Эксперта Редактор", MessageBoxButton.YesNoCancel);
+                    if (result == MessageBoxResult.OK) CommandBinding_Save(null, null);
+                    if (result == MessageBoxResult.Cancel) return;
+                }
                 save_path = null;
                 NewTree();
                 SR = new System.IO.StreamReader(OFD.FileName);
@@ -386,8 +392,7 @@ namespace Editor
         {
             if (!is_save)
             {
-                MessageBoxResult result = System.Windows.MessageBox.Show("Сохранить изменения?", "АРМ Эксперта Редактор",
-                    MessageBoxButton.YesNoCancel);
+                result = System.Windows.MessageBox.Show("Сохранить изменения?", "АРМ Эксперта Редактор",MessageBoxButton.YesNoCancel);
                 if (result == MessageBoxResult.Yes) CommandBinding_Save(null, null);
                 if (result == MessageBoxResult.Cancel) e.Cancel = true;
             }
