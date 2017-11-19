@@ -28,8 +28,7 @@ namespace Assessor.Windows
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            if (current.Children.Count == 0) current.Is_Ready = true;
-            current.Parent.ChangeRightBorder();
+            current.UpdateValues();
         }
 
         private void TextBox_PreviewKeyDown(object sender, KeyEventArgs e)

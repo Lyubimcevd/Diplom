@@ -16,13 +16,13 @@ namespace Assessor.Classes
         [DataMember]
         string naim;
         [DataMember]
-        int expert_opinion, coeff_import;
+        int expert_opinion, addmin_coeff;
 
         public SaveClassExpert(TreeViewExpertModal psave)
         {
             naim = psave.Naim;
             expert_opinion = psave.ExpertOpinion;
-            coeff_import = psave.CoeffImport;
+            addmin_coeff = psave.AdminCoeff;
             foreach (TreeViewExpertModal mod in psave.Children) children.Add(mod.Save);
         }
         public string Naim
@@ -46,11 +46,11 @@ namespace Assessor.Classes
                 return expert_opinion;
             }
         }
-        public int CoeffImport
+        public int AdminCoeff
         {
             get
             {
-                return coeff_import;
+                return addmin_coeff;
             }
         }
     }

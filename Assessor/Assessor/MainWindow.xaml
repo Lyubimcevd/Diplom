@@ -21,6 +21,8 @@
                         CanExecute="SaveAs_CanExecute"/>
         <CommandBinding Command="Help" 
                         Executed="CommandBinding_Help"/>
+        <CommandBinding Command="Print"
+                        Executed="CommandBinding_Print"/>
     </Window.CommandBindings>
     <Grid>
         <Grid.RowDefinitions>
@@ -49,6 +51,7 @@
                 <ComboBoxItem Content="Эксперт"/>
                 <ComboBoxItem Content="Администратор"/>
             </ComboBox>
+            <MenuItem Header="Отчёт" Command="Print"/>
             <MenuItem Header="Справка">
                 <MenuItem Header="Просмотр справки" 
                           Command="Help"/>

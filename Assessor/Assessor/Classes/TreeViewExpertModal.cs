@@ -14,8 +14,11 @@ namespace Assessor.Classes
         ObservableCollection<TreeViewExpertModal> children = new ObservableCollection<TreeViewExpertModal>();
         string naim;
         TreeViewExpertModal parent;
-        int expert_opinion,coeff_import,max = 100;
-        bool is_doubleclick,is_ready = false;
+        int expert_opinion = -1,
+            addmin_coeff = 0,
+            max = 100;
+        bool is_doubleclick,
+             is_ready = false;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -23,11 +26,9 @@ namespace Assessor.Classes
         {
             naim = sc.Naim;
             expert_opinion = sc.ExpertOpinion;
-            coeff_import = sc.CoeffImport;
+            addmin_coeff = sc.AdminCoeff;
             parent = ppar;
             foreach (SaveClassExpert cur in sc.Children) children.Add(new TreeViewExpertModal(cur,this));
-            if (Children.Count != 0) ChangeRightBorder();
-            else Is_Ready = true;
         }
         public TreeViewExpertModal(SaveClass sc, TreeViewExpertModal ppar)
         {
@@ -64,23 +65,25 @@ namespace Assessor.Classes
                 expert_opinion = value;
             }
         }
-        public int CoeffImport
+        public int AdminCoeff
         {
             get
             {
-                return coeff_import;
+                return addmin_coeff;
             }
             set
             {
-                coeff_import = value;
+                addmin_coeff = value;
             }
         }
         public int ValueForSlider
         {
             get
             {
-                if (WorkMode.IsExpert) return expert_opinion;
-                else return coeff_import;
+                if (WorkMode.IsExpert)
+                    if (ExpertOpinion == -1) return 0;
+                    else return ExpertOpinion;
+                else return AdminCoeff;
             }
             set
             {
@@ -89,8 +92,9 @@ namespace Assessor.Classes
                     MessageBox.Show("Максимально возможное значение: " + max, "АРМ Эксперта Оценка");
                     value = max;
                 }
-                if (WorkMode.IsExpert) expert_opinion = value;
-                else coeff_import = value;
+                if (WorkMode.IsExpert) ExpertOpinion = value;
+                else AdminCoeff = value;
+                if (Children.Count == 0) Is_Ready = true;
                 OnPropertyChanged("ValueForSlider");
             }
         }
@@ -126,8 +130,8 @@ namespace Assessor.Classes
             set
             {
                 is_ready = value;
+                if (is_ready&&WorkMode.IsExpert) MakeExpertOpinion();
                 OnPropertyChanged("Color");
-                OnPropertyChanged("NaimForScreen");
             }
         }
         public string Color
@@ -160,18 +164,39 @@ namespace Assessor.Classes
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
         }
-        public void ChangeRightBorder()
+        public void UpdateValues()
         {
-            int sum = 100;
-            bool is_all_ready = true;
-            foreach (TreeViewExpertModal modal in Children)
+            if (!WorkMode.IsExpert)
             {
-                sum -= modal.ValueForSlider;
-                if (!modal.Is_Ready) is_all_ready = false;
+                int sum = 100;
+                if (Children.Count == 0) sum = 0;
+                else
+                {
+                    foreach (TreeViewExpertModal modal in Children) sum -= modal.ValueForSlider;
+                    foreach (TreeViewExpertModal modal in Children) modal.Max = sum + modal.ValueForSlider;
+                }
+                if (sum == 0) Is_Ready = true;
+                else Is_Ready = false;
             }
-            foreach (TreeViewExpertModal modal in Children) modal.Max = sum + modal.ValueForSlider;
-            if ((sum == 0) && is_all_ready) Is_Ready = true;
-            else Is_Ready = false;
+            else
+            {
+                bool is_all_ready = true;
+                foreach (TreeViewExpertModal child in Children)
+                    if (child.ExpertOpinion == -1)
+                    {
+                        is_all_ready = false;
+                        break;
+                    }
+                if (is_all_ready) Is_Ready = true;                
+            }
+            if (Parent != null) Parent.UpdateValues();
+        }
+        void MakeExpertOpinion()
+        {
+            foreach(TreeViewExpertModal child in Children)
+            {
+                ExpertOpinion += child.ExpertOpinion * child.AdminCoeff/100;
+            }
         }
     }
 }

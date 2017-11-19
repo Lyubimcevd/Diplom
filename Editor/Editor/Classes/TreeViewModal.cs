@@ -70,7 +70,7 @@ namespace Editor.Classes
                 foreach (TreeViewModal list in Children)
                 {
                     clone.Children.Add(list.Clone);
-                    clone.Children.Last().Parent = this;
+                    clone.Children.Last().Parent = clone;
                 }
                 return clone;
             }

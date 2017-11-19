@@ -1,17 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using Assessor.Classes;
 using System.Collections.ObjectModel;
 using System.Windows.Forms;
@@ -46,6 +35,8 @@ namespace Assessor
             WorkMode.IsExpert = true;
         }
 
+        #region CommandBindings
+
         void CommandBinding_New(object sender, ExecutedRoutedEventArgs e)
         {
             OFD = new OpenFileDialog();
@@ -53,7 +44,6 @@ namespace Assessor
             else OFD.Filter = "ГОСТ (*.gstx)|*.gstx|Все файлы (*.*)|*.*";
             open_file = false;
             OFD.RestoreDirectory = true;
-
             if (OFD.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 if (!is_save)
@@ -64,11 +54,13 @@ namespace Assessor
                     if (result == MessageBoxResult.Cancel) return;
                 }
                 save_path = OFD.FileName;
-                BF = new DataContractJsonSerializer(typeof(SaveClass));
+                if (!WorkMode.IsExpert) BF = new DataContractJsonSerializer(typeof(SaveClass));
+                else BF = new DataContractJsonSerializer(typeof(SaveClassExpert));
                 using (FileStream fs = new FileStream(save_path, FileMode.Open))
                 {
                     Root = new ObservableCollection<TreeViewExpertModal>();
-                    Root.Add(new TreeViewExpertModal(BF.ReadObject(fs) as SaveClass, null));
+                    if (!WorkMode.IsExpert) Root.Add(new TreeViewExpertModal(BF.ReadObject(fs) as SaveClass, null));
+                    else Root.Add(new TreeViewExpertModal(BF.ReadObject(fs) as SaveClassExpert, null));
                 }
                 tree.ItemsSource = Root;
                 windows_title.Title = "АРМ Эксперта Оценка: " + OFD.FileName;
@@ -111,12 +103,9 @@ namespace Assessor
         void CommandBinding_Save(object sender, ExecutedRoutedEventArgs e)
         {
             BF = new DataContractJsonSerializer(typeof(SaveClassExpert));
-            if (WorkMode.IsExpert)
-                if (!open_file) CommandBinding_SaveAs(null, null);
-                else SaveInFile();
-            else
-                if (!open_file) CommandBinding_SaveAs(null, null);
-                else SaveInFile();
+            if (!open_file) CommandBinding_SaveAs(null, null);
+            else SaveInFile();
+       
         }
 
         void CommandBinding_SaveAs(object sender, ExecutedRoutedEventArgs e)
@@ -139,6 +128,13 @@ namespace Assessor
             IE.Navigate(System.Windows.Forms.Application.StartupPath + @"\Help\Help.html");
             IE.Visible = true;
         }
+
+        void CommandBinding_Print(object sender, ExecutedRoutedEventArgs e)
+        {
+            Print.Init().PrintDocument(Root[0]);
+        }
+
+        #endregion
 
         private void Save_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
@@ -210,13 +206,14 @@ namespace Assessor
         private void TextBlock_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             current = (sender as TextBlock).DataContext as TreeViewExpertModal;
-            if (e.ClickCount == 2)
-            {
-                SliderWindow SW = new SliderWindow(current);
-                SW.ShowDialog();
-                current.IsDoubleClick = true;
-                is_save = false;
-            }
+            if (WorkMode.IsExpert&&current.Children.Count == 0||!WorkMode.IsExpert&&current.Parent.Parent != null)
+                if (e.ClickCount == 2)
+                {
+                    SliderWindow SW = new SliderWindow(current);
+                    SW.ShowDialog();
+                    current.IsDoubleClick = true;
+                    is_save = false;
+                }
         }
 
         void CloseCurrentFile()
