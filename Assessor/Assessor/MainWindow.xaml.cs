@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
+using System.Linq;
 using System.Windows.Input;
 using Assessor.Classes;
 using System.Collections.ObjectModel;
@@ -105,7 +106,6 @@ namespace Assessor
             BF = new DataContractJsonSerializer(typeof(SaveClassExpert));
             if (!open_file) CommandBinding_SaveAs(null, null);
             else SaveInFile();
-       
         }
 
         void CommandBinding_SaveAs(object sender, ExecutedRoutedEventArgs e)
@@ -212,7 +212,7 @@ namespace Assessor
                     SliderWindow SW = new SliderWindow(current);
                     SW.ShowDialog();
                     current.IsDoubleClick = true;
-                    is_save = false;
+                    NotSave();
                 }
         }
 
@@ -233,6 +233,12 @@ namespace Assessor
             }
             windows_title.Title = "АРМ Эксперта Оценка: " + save_path;
             is_save = true;
+        }
+
+        void NotSave()
+        {
+            is_save = false;
+            if (windows_title.Title.Last()!= '*') windows_title.Title += "*";
         }
     }
 }

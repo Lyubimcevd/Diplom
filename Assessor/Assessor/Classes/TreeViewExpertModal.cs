@@ -15,7 +15,7 @@ namespace Assessor.Classes
         string naim;
         TreeViewExpertModal parent;
         int expert_opinion = -1,
-            addmin_coeff = 0,
+            admin_coeff = 0,
             max = 100;
         bool is_doubleclick,
              is_ready = false;
@@ -26,9 +26,17 @@ namespace Assessor.Classes
         {
             naim = sc.Naim;
             expert_opinion = sc.ExpertOpinion;
-            addmin_coeff = sc.AdminCoeff;
+            admin_coeff = sc.AdminCoeff;
             parent = ppar;
             foreach (SaveClassExpert cur in sc.Children) children.Add(new TreeViewExpertModal(cur,this));
+            if (WorkMode.IsExpert)
+            {
+                if (expert_opinion != -1) Is_Ready = true;
+            }
+            else
+            {
+                UpdateValues();
+            }
         }
         public TreeViewExpertModal(SaveClass sc, TreeViewExpertModal ppar)
         {
@@ -69,11 +77,11 @@ namespace Assessor.Classes
         {
             get
             {
-                return addmin_coeff;
+                return admin_coeff;
             }
             set
             {
-                addmin_coeff = value;
+                admin_coeff = value;
             }
         }
         public int ValueForSlider
@@ -130,7 +138,8 @@ namespace Assessor.Classes
             set
             {
                 is_ready = value;
-                if (is_ready&&WorkMode.IsExpert) MakeExpertOpinion();
+                if (is_ready&&WorkMode.IsExpert)
+                    if (ExpertOpinion==-1) MakeExpertOpinion();
                 OnPropertyChanged("Color");
             }
         }
@@ -169,13 +178,19 @@ namespace Assessor.Classes
             if (!WorkMode.IsExpert)
             {
                 int sum = 100;
+                bool is_all_ready = true;
                 if (Children.Count == 0) sum = 0;
                 else
                 {
                     foreach (TreeViewExpertModal modal in Children) sum -= modal.ValueForSlider;
                     foreach (TreeViewExpertModal modal in Children) modal.Max = sum + modal.ValueForSlider;
+                    foreach (TreeViewExpertModal modal in Children)
+                    {
+                        if (!modal.Is_Ready) is_all_ready = false;
+                        break;
+                    }
                 }
-                if (sum == 0) Is_Ready = true;
+                if (sum == 0&&is_all_ready) Is_Ready = true;
                 else Is_Ready = false;
             }
             else

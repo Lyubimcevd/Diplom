@@ -29,7 +29,6 @@ namespace Editor.Classes
                 OnPropertyChanged("Title");
             }
         }
-
         public void OnPropertyChanged(string prop)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
