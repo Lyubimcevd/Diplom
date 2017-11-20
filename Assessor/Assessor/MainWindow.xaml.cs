@@ -206,7 +206,7 @@ namespace Assessor
         private void TextBlock_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             current = (sender as TextBlock).DataContext as TreeViewExpertModal;
-            if (WorkMode.IsExpert&&current.Children.Count == 0||!WorkMode.IsExpert&&current.Parent.Parent != null)
+            if (WorkMode.IsExpert&&current.Children.Count == 0)
                 if (e.ClickCount == 2)
                 {
                     SliderWindow SW = new SliderWindow(current);
@@ -214,6 +214,16 @@ namespace Assessor
                     current.IsDoubleClick = true;
                     NotSave();
                 }
+            if (!WorkMode.IsExpert)
+                if (current.Parent!=null)
+                    if (current.Parent.Parent!=null)
+                        if (e.ClickCount == 2)
+                        {
+                            SliderWindow SW = new SliderWindow(current);
+                            SW.ShowDialog();
+                            current.IsDoubleClick = true;
+                            NotSave();
+                        }
         }
 
         void CloseCurrentFile()
