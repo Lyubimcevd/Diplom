@@ -89,7 +89,10 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Classes\Commands.cs" />
+    <Compile Include="Classes\Converters.cs" />
     <Compile Include="Classes\SaveClass.cs" />
+    <Compile Include="Classes\Server.cs" />
+    <Compile Include="Classes\ServerModal.cs" />
     <Compile Include="Classes\TitleViewModal.cs" />
     <Compile Include="Windows\AboutBox.cs">
       <SubType>Form</SubType>

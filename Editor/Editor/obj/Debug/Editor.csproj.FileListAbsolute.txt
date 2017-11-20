@@ -67,3 +67,8 @@ E:\Учеба\Diplom\Editor\Editor\obj\Debug\Editor.exe.manifest
 E:\Учеба\Diplom\Editor\Editor\obj\Debug\Editor.application
 E:\Учеба\Diplom\Editor\Editor\obj\Debug\Editor.exe
 E:\Учеба\Diplom\Editor\Editor\obj\Debug\Editor.pdb
+D:\Project\Diplom\Editor\Editor\bin\Debug\Editor.exe.config
+D:\Project\Diplom\Editor\Editor\obj\Debug\Interop.SHDocVw.dll
+D:\Project\Diplom\Editor\Editor\obj\Debug\Editor.csproj.ResolveComReference.cache
+D:\Project\Diplom\Editor\Editor\obj\Debug\Editor.exe
+D:\Project\Diplom\Editor\Editor\obj\Debug\Editor.pdb

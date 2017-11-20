@@ -16,15 +16,15 @@
       <requestedPrivileges xmlns="urn:schemas-microsoft-com:asm.v3">
         <!--
           Параметры манифеста UAC
-          При необходимости изменить уровень управления учетными записями Windows замените 
-          узел requestedExecutionLevel одним из следующих значений.
+          При необходимости изменить уровень контроля учетных записей Windows замените узел 
+          requestedExecutionLevel одним из следующих значений.
 
         <requestedExecutionLevel  level="asInvoker" uiAccess="false" />
         <requestedExecutionLevel  level="requireAdministrator" uiAccess="false" />
         <requestedExecutionLevel  level="highestAvailable" uiAccess="false" />
 
-        Если вы хотите использовать виртуализацию файлов и реестра для обратной
-             совместимости, удалите узел requestedExecutionLevel.
+         Если вы хотите использовать виртуализацию файлов и реестра для обратной 
+         совместимости, удалите узел requestedExecutionLevel.
     -->
         <requestedExecutionLevel level="asInvoker" uiAccess="false" />
       </requestedPrivileges>
@@ -43,14 +43,14 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Editor.exe" size="283088">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Editor.exe" size="283056">
       <assemblyIdentity name="Editor" version="1.0.0.0" language="neutral" processorArchitecture="msil" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-        <dsig:DigestValue>eO8pdTwX9MPI7++4TtyIR58Vm5PZm7W0BI9Fv9hFxMA=</dsig:DigestValue>
+        <dsig:DigestValue>mf0/+N53C1nByZc4IyFC7loKrEYmnCf3vPFN7GNzDjw=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
