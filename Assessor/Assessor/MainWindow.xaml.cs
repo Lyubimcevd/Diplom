@@ -2,12 +2,12 @@
 using System.Windows.Controls;
 using System.Linq;
 using System.Windows.Input;
-using Assessor.Classes;
 using System.Collections.ObjectModel;
 using System.Windows.Forms;
 using System.IO;
 using System.Runtime.Serialization.Json;
 using Assessor.Windows;
+using Assessor.Classes;
 
 namespace Assessor
 {
@@ -22,6 +22,7 @@ namespace Assessor
         SHDocVw.InternetExplorer IE;
         AboutBox AB;
         MessageBoxResult result;
+        Editor ED;
         string save_path;
         bool is_save = true,
              is_open = false,
@@ -224,6 +225,19 @@ namespace Assessor
                             current.IsDoubleClick = true;
                             NotSave();
                         }
+        }
+
+        private void ChangeWorkMode(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void OpenEditor(object sender, RoutedEventArgs e)
+        {
+            //Варианты: 1) Открыта модель и хочется её подредактировать. Т.е. если открыта модель, то редактор подцепит её.
+            //2) Модель не открыта. Тогда редактор просто запустится. Имеет смысл удалить из редактора пункт Открыть.
+            ED = new Editor();
+            ED.ShowDialog();
         }
 
         void CloseCurrentFile()

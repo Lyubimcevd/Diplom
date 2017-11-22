@@ -1,0 +1,138 @@
+﻿<Window x:Class="Assessor.Windows.Editor"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Assessor.Windows"
+        xmlns:classes="clr-namespace:Assessor.Classes"
+        mc:Ignorable="d"
+        Title="{Binding Title}" 
+        Height="350" 
+        Width="525" 
+        Closing="Window_Closing">
+    <Window.CommandBindings>
+        <CommandBinding Command="New" 
+                        Executed="CommandBinding_New"/>
+        <CommandBinding Command="Open" 
+                        Executed="CommandBinding_Open"/>
+        <CommandBinding Command="Save" 
+                        Executed="CommandBinding_Save"
+                        CanExecute="Save_CanExecute"/>
+        <CommandBinding Command="SaveAs" 
+                        Executed="CommandBinding_SaveAs"
+                        CanExecute="SaveAs_CanExecute"/>
+        <CommandBinding Command="Cut" 
+                        Executed="CommandBinding_Cut"
+                        CanExecute="Cut_CanExecute"/>
+        <CommandBinding Command="Copy" 
+                        Executed="CommandBinding_Copy"
+                        CanExecute="Copy_CanExecute"/>
+        <CommandBinding Command="Paste" 
+                        Executed="CommandBinding_Paste"
+                        CanExecute="Paste_CanExecute"/>
+        <CommandBinding Command="classes:Commands.Rename"
+                        Executed="CommandBinding_Rename"
+                        CanExecute="Rename_CanExecute"/>
+        <CommandBinding Command="Undo" 
+                        Executed="CommandBinding_Undo"
+                        CanExecute="Undo_CanExecute"/>
+        <CommandBinding Command="Help" 
+                        Executed="CommandBinding_Help"/>
+        <CommandBinding Command="Close" 
+                        Executed="CommandBinding_Close"/>
+        <CommandBinding Command="classes:Commands.Forward" 
+                        Executed="CommandBinding_Forward"
+                        CanExecute="Forward_CanExecute"/>
+        <CommandBinding Command="Delete" 
+                        Executed="CommandBinding_Delete"
+                        CanExecute="Delete_CanExecute"/>
+    </Window.CommandBindings>
+    <Window.InputBindings>
+        <KeyBinding Command="classes:Commands.Forward" 
+                    Key="Y" 
+                    Modifiers="Ctrl"/>
+    </Window.InputBindings>
+    <Window.Resources>
+        <ContextMenu x:Key="Context_menu_mvm">
+            <MenuItem Header="Новый лист" 
+                      Click="Add_New_Element"/>
+            <Separator/>
+            <MenuItem Header="Вырезать" 
+                      Command="Cut"/>
+            <MenuItem Header="Копировать" 
+                      Command="Copy"/>
+            <MenuItem Header="Вставить" 
+                      Command="Paste"/>
+            <MenuItem Header="Переименовать" 
+                      Command="classes:Commands.Rename"/>
+        </ContextMenu>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="25"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <Menu>
+            <MenuItem Header="Файл">
+                <MenuItem Header="Создать" 
+                          Command="New"/>
+                <MenuItem Header="Открыть" 
+                          Command="Open"/>
+                <Separator/>
+                <MenuItem Header="Сохранить" 
+                          Command="Save"/>
+                <MenuItem Header="Сохранить как..." 
+                          Command="SaveAs"/>
+                <Separator/>
+                <MenuItem Header="Импорт" 
+                          Click="Import_Click"/>
+                <MenuItem Header="Экспорт" 
+                          Click="Export_Click"/>
+                <Separator/>
+                <MenuItem Header="Выход" 
+                          Command="Close"/>
+            </MenuItem>
+            <MenuItem Header="Изменить">
+                <MenuItem Header="Отменить" 
+                          Command="Undo"/>
+                <MenuItem Header="Вернуть" 
+                          Command="classes:Commands.Forward" 
+                          InputGestureText="Ctrl+Y"/>
+                <Separator/>
+                <MenuItem Header="Вырезать" 
+                          Command="Cut"/>
+                <MenuItem Header="Копировать" 
+                          Command="Copy" />
+                <MenuItem Header="Вставить" 
+                          Command="Paste"/>
+                <MenuItem Header="Удалить" 
+                          Command="Delete"/>
+            </MenuItem>
+            <MenuItem Header="Справка">
+                <MenuItem Header="Просмотр справки"
+                          Command="Help"/>
+                <Separator/>
+                <MenuItem Header="О программе АРМ Эксперта Редактор" 
+                          Click="About_Click"/>
+            </MenuItem>
+        </Menu>
+        <TreeView x:Name="tree"
+                  Grid.Row="1">
+            <TreeView.ItemTemplate>
+                <HierarchicalDataTemplate ItemsSource="{Binding Children}">
+                    <TextBlock Text="{Binding Naim}"
+                               ContextMenu="{StaticResource Context_menu_mvm}" 
+                               MouseLeftButtonDown="Rename_DoubleClick"/>
+                </HierarchicalDataTemplate>
+            </TreeView.ItemTemplate>
+            <TreeView.ItemContainerStyle>
+                <Style TargetType="TreeViewItem">
+                    <EventSetter Event="Expanded" Handler="TreeViewItemExpanded"/>
+                    <EventSetter Event="Collapsed" Handler="TreeViewItemCollapsed"/>
+                    <EventSetter Event="PreviewMouseRightButtonDown" Handler="TreeViewItemPreviewMouseRightButtonDown"/>
+                    <EventSetter Event="PreviewMouseLeftButtonDown" Handler="TreeViewItemPreviewMouseLeftButtonDown"/>
+                </Style>
+            </TreeView.ItemContainerStyle>
+        </TreeView>
+    </Grid>
+</Window>

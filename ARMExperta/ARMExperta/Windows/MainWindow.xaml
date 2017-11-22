@@ -1,14 +1,14 @@
-﻿<Window x:Class="Assessor.MainWindow"
+﻿<Window x:Class="ARMExperta.Windows.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:Assessor"
+        xmlns:local="clr-namespace:ARMExperta.Windows"
+        xmlns:classes="clr-namespace:ARMExperta.Classes"
         mc:Ignorable="d"
-        Title="{Binding Title}"
-        Height="350" 
-        Width="525" 
-        Closing="Window_Closing">
+        Title="MainWindow" 
+        Height="300" 
+        Width="300">
     <Window.CommandBindings>
         <CommandBinding Command="New" 
                         Executed="CommandBinding_New"/>
@@ -25,60 +25,67 @@
         <CommandBinding Command="Print"
                         Executed="CommandBinding_Print"/>
     </Window.CommandBindings>
+    <Window.Resources>
+        <ContextMenu x:Key="Context_menu_mvm">
+            <MenuItem Header="Новый лист" 
+                      Click="Add_New_Element"/>
+            <Separator/>
+            <MenuItem Header="Вырезать" 
+                      Command="Cut"/>
+            <MenuItem Header="Копировать" 
+                      Command="Copy"/>
+            <MenuItem Header="Вставить" 
+                      Command="Paste"/>
+            <MenuItem Header="Переименовать"/>
+        </ContextMenu>
+    </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="30"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition/>
-        </Grid.ColumnDefinitions>
         <Menu>
             <MenuItem Header="Файл">
                 <MenuItem Header="Новая модель оценки" 
                           Command="New"/>
                 <MenuItem Header="Открыть модель оценки" 
                           Command="Open"/>
+                <Separator/>
                 <MenuItem Header="Сохранить" 
                           Command="Save"/>
                 <MenuItem Header="Сохранить как..." 
                           Command="SaveAs"/>
+                <Separator/>
+                <MenuItem Header="Режим работы"/>
+                <Separator/>
+                <MenuItem Header="Печать отчёта" 
+                          Command="Print"/>
+                <Separator/>
                 <MenuItem Header="Выход"
                           Command="Close"/>
             </MenuItem>
-            <ComboBox Width="150" 
-                      SelectedIndex="0" 
-                      SelectionChanged="ComboBox_SelectionChanged">
-                <ComboBoxItem Content="Эксперт"/>
-                <ComboBoxItem Content="Администратор"/>
-            </ComboBox>
-            <MenuItem Header="Сменить режим работы" Click="ChangeWorkMode"/>
-            <MenuItem Header="Отчёт" Command="Print"/>
-            <MenuItem Header="Редактор" Click="OpenEditor"/>
+            <MenuItem Header="Изменить">
+                <MenuItem Header="Отменить" 
+                          Command="Undo"/>
+                <MenuItem Header="Вернуть" 
+                          InputGestureText="Ctrl+Y"/>
+                <Separator/>
+                <MenuItem Header="Вырезать" 
+                          Command="Cut"/>
+                <MenuItem Header="Копировать" 
+                          Command="Copy" />
+                <MenuItem Header="Вставить" 
+                          Command="Paste"/>
+                <MenuItem Header="Удалить" 
+                          Command="Delete"/>
+            </MenuItem>
             <MenuItem Header="Справка">
-                <MenuItem Header="Просмотр справки" 
+                <MenuItem Header="Просмотр справки"
                           Command="Help"/>
-                <MenuItem Header="О программе АРМ Эксперта Оценка" 
+                <Separator/>
+                <MenuItem Header="О программе АРМ Эксперта Редактор" 
                           Click="About_Click"/>
             </MenuItem>
         </Menu>
-        <TreeView x:Name="tree"
-                  Grid.Row="1">
-            <TreeView.ItemTemplate>
-                <HierarchicalDataTemplate ItemsSource="{Binding Children}">
-                    <TextBlock Text="{Binding Naim}" 
-                               PreviewMouseLeftButtonDown="TextBlock_PreviewMouseLeftButtonDown"
-                               Foreground="{Binding Color}"/>
-                </HierarchicalDataTemplate>
-            </TreeView.ItemTemplate>
-            <TreeView.ItemContainerStyle>
-                <Style TargetType="TreeViewItem">
-                    <EventSetter Event="Expanded" 
-                                 Handler="TreeViewItemExpanded"/>
-                    <EventSetter Event="Collapsed" 
-                                 Handler="TreeViewItemCollapsed"/>
-                </Style>
-            </TreeView.ItemContainerStyle>
-        </TreeView>
     </Grid>
 </Window>
