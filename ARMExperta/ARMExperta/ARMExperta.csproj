@@ -75,6 +75,9 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Classes\Commands.cs" />
+    <Compile Include="Classes\CurrentSystemStatus.cs" />
+    <Compile Include="Classes\TitleModal.cs" />
+    <Compile Include="Classes\TreeViewModal.cs" />
     <Compile Include="Windows\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </Compile>

@@ -19,6 +19,7 @@ namespace ARMExperta.Windows
     public partial class Login : Window
     {
         Dictionary<string, string> login_password;
+        MainWindow MW;
 
         public Login()
         {
@@ -31,8 +32,11 @@ namespace ARMExperta.Windows
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            if (textbox_password.Text == login_password[combobox_login.Text]) ;
-            //всё хорошо
+            if (textbox_password.Text == login_password[combobox_login.Text])
+            {
+                MW = new MainWindow();
+                MW.Show();
+            }
             else MessageBox.Show("Неверный пароль");
         }
 

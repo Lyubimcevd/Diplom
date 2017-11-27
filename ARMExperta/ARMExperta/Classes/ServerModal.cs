@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ARMExperta.Classes
 {
-    class ServerModal
+    public class ServerModal
     {
         int id, p_id, group_id, admin_coef, expert_opin;
         string naim;

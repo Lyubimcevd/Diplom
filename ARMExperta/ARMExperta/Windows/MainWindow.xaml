@@ -6,9 +6,10 @@
         xmlns:local="clr-namespace:ARMExperta.Windows"
         xmlns:classes="clr-namespace:ARMExperta.Classes"
         mc:Ignorable="d"
-        Title="MainWindow" 
+        Title="{Binding Title}" 
         Height="300" 
-        Width="300">
+        Width="300" 
+        WindowState="Maximized">
     <Window.CommandBindings>
         <CommandBinding Command="New" 
                         Executed="CommandBinding_New"/>
@@ -20,11 +21,37 @@
         <CommandBinding Command="SaveAs" 
                         Executed="CommandBinding_SaveAs"
                         CanExecute="SaveAs_CanExecute"/>
+        <CommandBinding Command="Cut" 
+                        Executed="CommandBinding_Cut"
+                        CanExecute="Cut_CanExecute"/>
+        <CommandBinding Command="Copy" 
+                        Executed="CommandBinding_Copy"
+                        CanExecute="Copy_CanExecute"/>
+        <CommandBinding Command="Paste" 
+                        Executed="CommandBinding_Paste"
+                        CanExecute="Paste_CanExecute"/>
+        <CommandBinding Command="classes:Commands.Rename" 
+                        Executed="CommandBinding_Rename"
+                        CanExecute="Rename_CanExecute"/>
+        <CommandBinding Command="Undo" 
+                        Executed="CommandBinding_Undo"
+                        CanExecute="Undo_CanExecute"/>
         <CommandBinding Command="Help" 
                         Executed="CommandBinding_Help"/>
-        <CommandBinding Command="Print"
-                        Executed="CommandBinding_Print"/>
+        <CommandBinding Command="Close" 
+                        Executed="CommandBinding_Close"/>
+        <CommandBinding Command="classes:Commands.Forward" 
+                        Executed="CommandBinding_Forward"
+                        CanExecute="Forward_CanExecute"/>
+        <CommandBinding Command="Delete" 
+                        Executed="CommandBinding_Delete"
+                        CanExecute="Delete_CanExecute"/>
     </Window.CommandBindings>
+    <Window.InputBindings>
+        <KeyBinding Command="classes:Commands.Forward" 
+                    Key="Y" 
+                    Modifiers="Ctrl"/>
+    </Window.InputBindings>
     <Window.Resources>
         <ContextMenu x:Key="Context_menu_mvm">
             <MenuItem Header="Новый лист" 
@@ -36,7 +63,8 @@
                       Command="Copy"/>
             <MenuItem Header="Вставить" 
                       Command="Paste"/>
-            <MenuItem Header="Переименовать"/>
+            <MenuItem Header="Переименовать" 
+                      Command="classes:Commands.Rename"/>
         </ContextMenu>
     </Window.Resources>
     <Grid>
@@ -68,6 +96,7 @@
                 <MenuItem Header="Отменить" 
                           Command="Undo"/>
                 <MenuItem Header="Вернуть" 
+                          Command="classes:Commands.Forward" 
                           InputGestureText="Ctrl+Y"/>
                 <Separator/>
                 <MenuItem Header="Вырезать" 
@@ -87,5 +116,23 @@
                           Click="About_Click"/>
             </MenuItem>
         </Menu>
+        <TreeView x:Name="tree"
+                  Grid.Row="1">
+            <TreeView.ItemTemplate>
+                <HierarchicalDataTemplate ItemsSource="{Binding Children}">
+                    <TextBlock Text="{Binding Naim}" 
+                               PreviewMouseLeftButtonDown="TextBlock_PreviewMouseLeftButtonDown"
+                               Foreground="{Binding Color}"/>
+                </HierarchicalDataTemplate>
+            </TreeView.ItemTemplate>
+            <TreeView.ItemContainerStyle>
+                <Style TargetType="TreeViewItem">
+                    <EventSetter Event="Expanded" 
+                                 Handler="TreeViewItemExpanded"/>
+                    <EventSetter Event="Collapsed" 
+                                 Handler="TreeViewItemCollapsed"/>
+                </Style>
+            </TreeView.ItemContainerStyle>
+        </TreeView>
     </Grid>
 </Window>
