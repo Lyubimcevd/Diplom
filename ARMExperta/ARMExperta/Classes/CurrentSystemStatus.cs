@@ -1,25 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Collections.ObjectModel;
 
 namespace ARMExperta.Classes
 {
-    class CurrentSystemStatus
+    class CurrentSystemStatus : INotifyPropertyChanged
     {
-        Dictionary<int, ServerModal> current_table_on_server;
-        Dictionary<int, TreeViewModal> current_tree_on_client;
+        ObservableCollection<TreeViewModal> tree = new ObservableCollection<TreeViewModal>();
+        ObservableCollection<TreeViewModal> old_tree = new ObservableCollection<TreeViewModal>();
         bool is_buffer = false,
-             is_history_end = true,
-             is_history_begin = true,
              is_save = true,
-             is_select = false,
              is_open = false,
              is_expert = false;
-        int group_id;
+        int current_pos;
         string current_file_path;
+        List<TreeViewModal> history = new List<TreeViewModal>();
+        User current_user;
+        TreeViewModal current_element;
+
         static CurrentSystemStatus current_sys_stat;
+        public event PropertyChangedEventHandler PropertyChanged;
 
         CurrentSystemStatus() { }
 
@@ -31,26 +35,19 @@ namespace ARMExperta.Classes
                 return current_sys_stat;
             }
         }
-        public Dictionary<int, ServerModal> CurrentTableOnServer
+    
+        public ObservableCollection<TreeViewModal> Tree
         {
             get
             {
-                return current_table_on_server;
-            }
-            set
-            {
-                current_table_on_server = value;
+                return tree;
             }
         }
-        public Dictionary<int, TreeViewModal> CurrentTreeOnClient
+        public ObservableCollection<TreeViewModal> OldTree
         {
             get
             {
-                return current_tree_on_client;
-            }
-            set
-            {
-                current_tree_on_client = value;
+                return old_tree;
             }
         }
         public bool IsOpen
@@ -62,7 +59,7 @@ namespace ARMExperta.Classes
             set
             {
                 is_open = value;
-                TitleModal.GetTitle.Update();
+                OnPropertyChanged("Title");
             }
         }
         public bool IsSave
@@ -74,7 +71,7 @@ namespace ARMExperta.Classes
             set
             {
                 is_save = value;
-                TitleModal.GetTitle.Update();
+                OnPropertyChanged("Title");
             }
           
         }
@@ -87,25 +84,40 @@ namespace ARMExperta.Classes
             set
             {
                 is_expert = value;
-                TitleModal.GetTitle.Update();
+                OnPropertyChanged("Title");
             }
         }
-        public string Group
+        public TreeViewModal CurrentElement
         {
             get
             {
-                return Server.GetServer.GetGroupByGroupId(group_id);
-            }
-        }
-        public int GroupId
-        {
-            get
-            {
-                return group_id;
+                return current_element;
             }
             set
             {
-                group_id = value;
+                current_element = value;
+            }
+        }
+        public bool IsBuffer
+        {
+            get
+            {
+                return is_buffer;
+            }
+            set
+            {
+                is_buffer = value;
+            }
+        }
+        public User CurrentUser
+        {
+            get
+            {
+                return current_user;
+            }
+            set
+            {
+                current_user = value;
             }
         }
         public string CurrentFilePath
@@ -117,8 +129,53 @@ namespace ARMExperta.Classes
             set
             {
                 current_file_path = value;
-                TitleModal.GetTitle.Update();
+                OnPropertyChanged("Title");
             }
+        }
+        public string Title
+        {
+            get
+            {
+                string title = "АРМ Эксперта ";
+                if (CurrentUser.IsGroup) title += " Группа : ";
+                title += "(" + CurrentUser.Naim + ")";  
+                if (IsExpert) title += "(Эксперт)";
+                else title += "(Администратор)";
+                if (CurrentFilePath != null) title += CurrentFilePath;
+                if (!IsSave) title += "*";
+                return title;
+            }
+        }
+        public int CurrentPosInHistory
+        {
+            get
+            {
+                return current_pos;
+            }
+        }
+        public List<TreeViewModal> History
+        {
+            get
+            {
+                return history;
+            }
+        }
+
+        public void AddInHistory()
+        {
+            history.Add(tree.First().Clone);
+            current_pos = history.Count - 1;
+        }
+        public void OnPropertyChanged(string prop)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
+        }
+        public int GetNewId()
+        {
+            int result = 0;
+            foreach (TreeViewModal tvm in Tree)
+                if (tvm.Id > result) result = tvm.Id;
+            return result+1;
         }
     }
 }

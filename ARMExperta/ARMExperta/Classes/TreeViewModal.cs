@@ -2,51 +2,34 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Windows;
+using System.Linq;
 
 namespace ARMExperta.Classes
 {
     public class TreeViewModal:INotifyPropertyChanged
     {
-        ObservableCollection<TreeViewModal> children = new ObservableCollection<TreeViewModal>();
         string naim;
-        TreeViewModal parent;
-        int expert_opinion,admin_coeff,max = 100;
-        int id;
-        bool is_doubleclick,is_ready = false;
+        int expert_opinion,admin_coeff,max = 100,id,par_id;
+        bool is_ready = false,
+             is_expanded = true;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public TreeViewModal(ServerModal sm)
-        {
-            id = sm.Id;
-            naim = sm.Naim;
-            expert_opinion = sm.ExpertOpinion;
-            admin_coeff = sm.AdminCoef;
-            if (!Dictionaries.GetDictionaries.CurrentTreeOnClient.ContainsKey(sm.ParentId))
-                Dictionaries.GetDictionaries.CurrentTreeOnClient.Add(sm.ParentId, 
-                    new TreeViewModal(Dictionaries.GetDictionaries.CurrentTableOnServer[sm.ParentId]));
-            parent = Dictionaries.GetDictionaries.CurrentTreeOnClient[sm.ParentId];
-            foreach (ServerModal child in Dictionaries.GetDictionaries.CurrentTableOnServer.Values)
-            {
-                if (child.ParentId == sm.Id)
-                {
-                    if (!Dictionaries.GetDictionaries.CurrentTreeOnClient.ContainsKey(child.Id))
-                        Dictionaries.GetDictionaries.CurrentTreeOnClient.Add(child.Id, 
-                            new TreeViewModal(Dictionaries.GetDictionaries.CurrentTableOnServer[child.Id]));
-                    children.Add(Dictionaries.GetDictionaries.CurrentTreeOnClient[child.Id]);
-                }
-            }
-        }
         public TreeViewModal(string p_naim)
         {
             naim = p_naim;
+            par_id = -1;
         }
-        
+        public TreeViewModal() { }
+                
         public ObservableCollection<TreeViewModal> Children
         {
             get
             {
-                return children;
+                ObservableCollection<TreeViewModal> result = new ObservableCollection<TreeViewModal>();
+                foreach (TreeViewModal tvm in CurrentSystemStatus.GetSS.Tree)
+                    if (tvm.Parent?.Id == Id) result.Add(tvm);
+                return result;  
             }
         }
         public string Naim
@@ -86,7 +69,7 @@ namespace ARMExperta.Classes
         {
             get
             {
-                if (WorkMode.IsExpert)
+                if (CurrentSystemStatus.GetSS.IsExpert)
                     if (ExpertOpinion == -1) return 0;
                     else return ExpertOpinion;
                 else
@@ -100,21 +83,21 @@ namespace ARMExperta.Classes
                     MessageBox.Show("Максимально возможное значение: " + max, "АРМ Эксперта Оценка");
                     value = max;
                 }
-                if (WorkMode.IsExpert) ExpertOpinion = value;
+                if (CurrentSystemStatus.GetSS.IsExpert) ExpertOpinion = value;
                 else AdminCoeff = value;
                 OnPropertyChanged("ValueForSlider");
                 OnPropertyChanged("Color");
             }
         }
-        public bool IsDoubleClick
+        public bool IsExpanded
         {
             get
             {
-                return is_doubleclick;
+                return is_expanded;
             }
             set
             {
-                is_doubleclick = value;
+                is_expanded = value;
             }
         }
         public int Max
@@ -127,17 +110,6 @@ namespace ARMExperta.Classes
             {
                 max = value;
                 OnPropertyChanged("Max");
-            }
-        }
-        public int GroupId
-        {
-            get
-            {
-                return group_id;
-            }
-            set
-            {
-                group_id = value;
             }
         }
         public int Id
@@ -160,7 +132,7 @@ namespace ARMExperta.Classes
             set
             {
                 is_ready = value;
-                if (is_ready&&WorkMode.IsExpert)
+                if (is_ready&&CurrentSystemStatus.GetSS.IsExpert)
                     if (ExpertOpinion==-1) MakeExpertOpinion();
                 OnPropertyChanged("Color");
             }
@@ -179,11 +151,14 @@ namespace ARMExperta.Classes
         {
             get
             {
-                return parent;
+                return CurrentSystemStatus.GetSS.Tree.FirstOrDefault(x => x.Id == par_id);
             }
+        }
+        public int ParentId
+        {
             set
             {
-                parent = value;
+                par_id = value;
             }
         }
         public void OnPropertyChanged(string prop)
@@ -192,15 +167,14 @@ namespace ARMExperta.Classes
         }
         public void UpdateValues()
         {
-            if (!WorkMode.IsExpert)
+            if (!CurrentSystemStatus.GetSS.IsExpert)
             {
                 int sum = 100;          
                 foreach (TreeViewModal modal in Children) sum -= modal.ValueForSlider;
                 foreach (TreeViewModal modal in Children) modal.Max = sum + modal.ValueForSlider;
                 if (sum == 0)
                     foreach (TreeViewModal modal in Children) modal.Is_Ready = true;
-                if (parent != null)
-                    if (parent.parent == null)
+                if (Parent?.Parent == null)
                     {
                         bool is_all_ready = true;
                         foreach (TreeViewModal modal in Children)
@@ -232,6 +206,23 @@ namespace ARMExperta.Classes
             {
                 ExpertOpinion += child.ExpertOpinion * child.AdminCoeff/100;
             }
+        }
+        public TreeViewModal Clone
+        {
+            get
+            {
+                TreeViewModal clone = new TreeViewModal(Naim);
+                foreach (TreeViewModal list in Children)
+                {
+                    clone.Children.Add(list.Clone);
+                    clone.Children.Last().ParentId = clone.Id;
+                }
+                return clone;
+            }
+        }
+        public void Update()
+        {
+            OnPropertyChanged("Children");
         }
     }
 }

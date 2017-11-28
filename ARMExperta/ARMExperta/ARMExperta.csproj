@@ -76,13 +76,16 @@
     </ApplicationDefinition>
     <Compile Include="Classes\Commands.cs" />
     <Compile Include="Classes\CurrentSystemStatus.cs" />
-    <Compile Include="Classes\TitleModal.cs" />
     <Compile Include="Classes\TreeViewModal.cs" />
+    <Compile Include="Classes\User.cs" />
     <Compile Include="Windows\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Windows\Registration.xaml.cs">
       <DependentUpon>Registration.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\WindowForEditNaim.xaml.cs">
+      <DependentUpon>WindowForEditNaim.xaml</DependentUpon>
     </Compile>
     <Page Include="Windows\Login.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -94,7 +97,6 @@
     </Compile>
     <Compile Include="Classes\Converters.cs" />
     <Compile Include="Classes\Server.cs" />
-    <Compile Include="Classes\ServerModal.cs" />
     <Compile Include="Windows\Login.xaml.cs">
       <DependentUpon>Login.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -106,6 +108,10 @@
     <Page Include="Windows\Registration.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Windows\WindowForEditNaim.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
   <ItemGroup>

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Data;
+using System.Linq;
 using System.Windows.Controls;
 using System.Collections.ObjectModel;
 using System.Collections;
@@ -51,30 +52,33 @@ namespace ARMExperta.Classes
             else return new List<object>();
         }
 
-        public List<ServerModal> GetModalByGroupId(int group_id)
+        public void GetModalByUser(User user)
         {
-            DA = new SqlDataAdapter("select * from modals where group_id = "+group_id.ToString(), conn);
+            DA = new SqlDataAdapter("select * from modals where group_id = "+user.Id.ToString()+" and is_group = "+user.IsGroup.ToString(), conn);
             CB = new SqlCommandBuilder(DA);
             DT = new DataTable();
             DA.Fill(DT);
-            return Converters.GetConverters().ConvertDataTableToServerModal(DT);
+            CurrentSystemStatus.GetSS.OldTree.Clear();
+            CurrentSystemStatus.GetSS.Tree.Clear();
+            Converters.GetConverters.ConvertDataTableToTree(DT);
+            foreach (TreeViewModal tvm in CurrentSystemStatus.GetSS.OldTree) CurrentSystemStatus.GetSS.Tree.Add(tvm.Clone);
         }
-        public Dictionary<string, string> GetUsersAndPassword()
+        public List<User> GetUsersAndPassword()
         {
-            tmp = ExecuteCommand("select fio,pwd from prep");
+            tmp = ExecuteCommand("select fio,id,pwd from prep");
             string[] mas;
-            Dictionary<string, string> result = new Dictionary<string, string>();
-            for (int i = 0; i < tmp.Count; i += 2) result.Add(tmp[i] as string, tmp[i + 1] as string);
-            tmp = ExecuteCommand("select id_uch,pwd from work_group");
+            List<User> result = new List<User>();
+            for (int i = 0; i < tmp.Count; i += 3) result.Add(new User(tmp[i].ToString(), Convert.ToInt32(tmp[i + 1]),tmp[i+2].ToString(),false));
+            tmp = ExecuteCommand("select id_uch,id,pwd from work_group");
             string login;
-            for (int i = 0; i < tmp.Count; i += 2)
+            for (int i = 0; i < tmp.Count; i += 3)
             {
-                login = "Группа №"+(i/2+1).ToString()+": ";
+                login = "";
                 mas = (tmp[i] as string).Split(',');
                 foreach (string id in mas)
-                    login += ExecuteCommand("select fio from group_id_fio where id = " + id)[0] as string + ",";
+                    login += ExecuteCommand("select fio from group_id_fio where id = " + id)[0].ToString() + ",";
                 login = login.Remove(login.Length - 1);
-                result.Add(login, tmp[i + 1] as string);
+                result.Add(new User(login, Convert.ToInt32(tmp[i + 1]),tmp[i+2].ToString(),true));
             }
             return result;
         }
@@ -98,8 +102,8 @@ namespace ARMExperta.Classes
         }
         public string GetGroupByGroupId(int group_id)
         {
-            tmp = ExecuteCommand("select id_uch from work_group where id = "+group_id.ToString());
-            string result = "";
+            string result = "";          
+            tmp = ExecuteCommand("select id_uch from work_group where id = " + group_id.ToString());              
             string[] mas = (tmp[0] as string).Split(',');
             foreach (string id in mas)
                 result += ExecuteCommand("select fio from group_id_fio where id = " + id)[0] as string + ",";
@@ -112,20 +116,14 @@ namespace ARMExperta.Classes
         }
         public void SaveOnServer()
         {
-            foreach (int key in Dictionaries.GetDictionaries.CurrentTreeOnClient.Keys)
-                if (Dictionaries.GetDictionaries.CurrentTableOnServer.ContainsKey(key))
-                    ExecuteCommand("update models set p_id = " + Dictionaries.GetDictionaries.CurrentTreeOnClient[key].Parent?.Id.ToString()
-                        + ",naim = " + Dictionaries.GetDictionaries.CurrentTreeOnClient[key].Naim
-                        + ",admin_coef = " + Dictionaries.GetDictionaries.CurrentTreeOnClient[key].AdminCoeff
-                        + ",expert_opin = " + Dictionaries.GetDictionaries.CurrentTreeOnClient[key].ExpertOpinion
-                        + "where id = " + key.ToString());
+            foreach (TreeViewModal tvm in CurrentSystemStatus.GetSS.Tree)
+                if (CurrentSystemStatus.GetSS.OldTree.FirstOrDefault(x=>x.Id == tvm.Id)!=null)
+                    ExecuteCommand("update models set p_id = " + tvm.Parent.Id+ ",naim = " + tvm.Naim + ",admin_coef = " + tvm.AdminCoeff
+                        + ",expert_opin = " + tvm.ExpertOpinion + "where id = " + tvm.Id);
                 else
-                    ExecuteCommand("INSERT INTO models(id,p_id,group_id,naim,admin_coef,expert_opin) VALUES (" + key.ToString() + ","
-                        + Dictionaries.GetDictionaries.CurrentTreeOnClient[key].Parent?.Id.ToString() + ","
-                        + Dictionaries.GetDictionaries.CurrentTreeOnClient[key].GroupId.ToString() + ",'"
-                        + Dictionaries.GetDictionaries.CurrentTreeOnClient[key].Naim + "',"
-                        + Dictionaries.GetDictionaries.CurrentTreeOnClient[key].AdminCoeff.ToString() + ","
-                        + Dictionaries.GetDictionaries.CurrentTreeOnClient[key].ExpertOpinion.ToString());
+                    ExecuteCommand("INSERT INTO models(id,p_id,group_id,naim,admin_coef,expert_opin,is_group) VALUES (" + tvm.Id + ","
+                        + tvm.Parent.Id + "," + CurrentSystemStatus.GetSS.CurrentUser.Id + ",'" + tvm.Naim + "'," + tvm.AdminCoeff + ","
+                        + tvm.ExpertOpinion + "," + CurrentSystemStatus.GetSS.CurrentUser.IsGroup);
         }
     }
 }

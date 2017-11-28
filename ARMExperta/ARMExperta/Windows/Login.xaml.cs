@@ -18,24 +18,28 @@ namespace ARMExperta.Windows
 {
     public partial class Login : Window
     {
-        Dictionary<string, string> login_password;
         MainWindow MW;
+        List<User> users;
 
         public Login()
         {
             InitializeComponent();
             
-            login_password = Server.GetServer.GetUsersAndPassword();
-            List<string> logins = login_password.Keys.ToList();
+            users = Server.GetServer.GetUsersAndPassword();
+            List<string> logins = new List<string>();
+            foreach (User user in users) logins.Add(user.Naim);
             combobox_login.ItemsSource = logins;
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            if (textbox_password.Text == login_password[combobox_login.Text])
+            User current_user = users.FirstOrDefault(x => x.Naim == combobox_login.SelectedValue.ToString());
+            if (textbox_password.Text == current_user.Password)
             {
+                CurrentSystemStatus.GetSS.CurrentUser = current_user;
                 MW = new MainWindow();
                 MW.Show();
+                this.Close();
             }
             else MessageBox.Show("Неверный пароль");
         }

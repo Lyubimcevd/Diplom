@@ -120,17 +120,17 @@
                   Grid.Row="1">
             <TreeView.ItemTemplate>
                 <HierarchicalDataTemplate ItemsSource="{Binding Children}">
-                    <TextBlock Text="{Binding Naim}" 
-                               PreviewMouseLeftButtonDown="TextBlock_PreviewMouseLeftButtonDown"
-                               Foreground="{Binding Color}"/>
+                    <TextBlock Text="{Binding Naim}"
+                               ContextMenu="{StaticResource Context_menu_mvm}" 
+                               PreviewMouseLeftButtonDown="TextBlock_PreviewMouseButtonDown" 
+                               PreviewMouseRightButtonDown="TextBlock_PreviewMouseButtonDown"/>
                 </HierarchicalDataTemplate>
             </TreeView.ItemTemplate>
             <TreeView.ItemContainerStyle>
                 <Style TargetType="TreeViewItem">
-                    <EventSetter Event="Expanded" 
-                                 Handler="TreeViewItemExpanded"/>
-                    <EventSetter Event="Collapsed" 
-                                 Handler="TreeViewItemCollapsed"/>
+                    <Setter Property="IsExpanded" Value="{Binding IsExpanded}"/>
+                    <EventSetter Event="Expanded" Handler="TreeViewItemExpanded"/>
+                    <EventSetter Event="Collapsed" Handler="TreeViewItemCollapsed"/>
                 </Style>
             </TreeView.ItemContainerStyle>
         </TreeView>
