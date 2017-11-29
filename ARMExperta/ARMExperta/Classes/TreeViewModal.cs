@@ -9,9 +9,14 @@ namespace ARMExperta.Classes
     public class TreeViewModal:INotifyPropertyChanged
     {
         string naim;
-        int expert_opinion,admin_coeff,max = 100,id,par_id;
+        int expert_opinion,
+            admin_coeff,
+            max = 100,
+            id,
+            par_id;
         bool is_ready = false,
-             is_expanded = true;
+             is_expanded = true,
+             is_buffer = false;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -19,6 +24,12 @@ namespace ARMExperta.Classes
         {
             naim = p_naim;
             par_id = -1;
+        }
+        public TreeViewModal(TreeViewModal main)
+        {
+            naim = main.Naim;
+            id = main.Id;
+            par_id = main.Parent.Id;
         }
         public TreeViewModal() { }
                 
@@ -29,7 +40,7 @@ namespace ARMExperta.Classes
                 ObservableCollection<TreeViewModal> result = new ObservableCollection<TreeViewModal>();
                 foreach (TreeViewModal tvm in CurrentSystemStatus.GetSS.Tree)
                     if (tvm.Parent?.Id == Id) result.Add(tvm);
-                return result;  
+                return result;
             }
         }
         public string Naim
@@ -137,6 +148,17 @@ namespace ARMExperta.Classes
                 OnPropertyChanged("Color");
             }
         }
+        public bool IsBuffer
+        {
+            get
+            {
+                return is_buffer;
+            }
+            set
+            {
+                is_buffer = value;
+            }
+        }
         public string Color
         {
             get
@@ -161,6 +183,7 @@ namespace ARMExperta.Classes
                 par_id = value;
             }
         }
+
         public void OnPropertyChanged(string prop)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
@@ -205,19 +228,6 @@ namespace ARMExperta.Classes
             foreach(TreeViewModal child in Children)
             {
                 ExpertOpinion += child.ExpertOpinion * child.AdminCoeff/100;
-            }
-        }
-        public TreeViewModal Clone
-        {
-            get
-            {
-                TreeViewModal clone = new TreeViewModal(Naim);
-                foreach (TreeViewModal list in Children)
-                {
-                    clone.Children.Add(list.Clone);
-                    clone.Children.Last().ParentId = clone.Id;
-                }
-                return clone;
             }
         }
         public void Update()

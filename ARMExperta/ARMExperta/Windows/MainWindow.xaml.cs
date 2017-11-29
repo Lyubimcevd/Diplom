@@ -62,27 +62,44 @@ namespace ARMExperta.Windows
 
         void CommandBinding_Undo(object sender, ExecutedRoutedEventArgs e)
         {
-            
+            CurrentSystemStatus.GetSS.CurrentPosInHistory--;
+            CurrentSystemStatus.GetSS.Tree = CurrentSystemStatus.GetSS.History[CurrentSystemStatus.GetSS.CurrentPosInHistory];
+            Root[0].Update();
+            CurrentSystemStatus.GetSS.IsSave = false;
         }
 
         void CommandBinding_Forward(object sender, ExecutedRoutedEventArgs e)
         {
-           
+            CurrentSystemStatus.GetSS.CurrentPosInHistory++;
+            CurrentSystemStatus.GetSS.Tree = CurrentSystemStatus.GetSS.History[CurrentSystemStatus.GetSS.CurrentPosInHistory];
+            Root[0].Update();
+            CurrentSystemStatus.GetSS.IsSave = false;
         }
 
         void CommandBinding_Cut(object sender, ExecutedRoutedEventArgs e)
         {
-            
+            CurrentSystemStatus.GetSS.CurrentElement.ParentId = -1;
+            CurrentSystemStatus.GetSS.SetLikeBuffer(CurrentSystemStatus.GetSS.CurrentElement);
+            Root[0].Update();
+            CurrentSystemStatus.GetSS.IsSave = false;
         }
 
         void CommandBinding_Copy(object sender, ExecutedRoutedEventArgs e)
         {
-            
+            CurrentSystemStatus.GetSS.CopySubTree(CurrentSystemStatus.GetSS.CurrentElement, -1);
+            CurrentSystemStatus.GetSS.SetLikeBuffer(CurrentSystemStatus.GetSS.CurrentElement);
         }
 
         void CommandBinding_Paste(object sender, ExecutedRoutedEventArgs e)
         {
-            
+            foreach (TreeViewModal tvm in CurrentSystemStatus.GetSS.Tree)
+                if (tvm.Parent == null && tvm.IsBuffer)
+                {
+                    tvm.ParentId = CurrentSystemStatus.GetSS.CurrentElement.Id;
+                    CurrentSystemStatus.GetSS.SetNoBuffer(tvm);
+                }
+            Root[0].Update();
+            CurrentSystemStatus.GetSS.IsSave = false;
         }
 
         void CommandBinding_Rename(object sender, ExecutedRoutedEventArgs e)
@@ -90,11 +107,14 @@ namespace ARMExperta.Windows
             WindowForEditNaim WFEN = new WindowForEditNaim(CurrentSystemStatus.GetSS.CurrentElement);
             WFEN.ShowDialog();
             Root[0].Update();
+            CurrentSystemStatus.GetSS.IsSave = false;
         }
 
         void CommandBinding_Delete(object sender, ExecutedRoutedEventArgs e)
         {
-           
+            CurrentSystemStatus.GetSS.DeleteSubTree(CurrentSystemStatus.GetSS.CurrentElement);
+            Root[0].Update();
+            CurrentSystemStatus.GetSS.IsSave = false;
         }
 
         void CommandBinding_Help(object sender, ExecutedRoutedEventArgs e)
@@ -135,7 +155,7 @@ namespace ARMExperta.Windows
 
         private void Paste_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
-            if (CurrentSystemStatus.GetSS.CurrentElement != null&& CurrentSystemStatus.GetSS.IsBuffer) e.CanExecute = true;
+            if (CurrentSystemStatus.GetSS.CurrentElement != null&& CurrentSystemStatus.GetSS.Buffer!=null) e.CanExecute = true;
             else e.CanExecute = false;
         }
 

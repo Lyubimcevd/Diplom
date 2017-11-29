@@ -59,9 +59,8 @@ namespace ARMExperta.Classes
             DT = new DataTable();
             DA.Fill(DT);
             CurrentSystemStatus.GetSS.OldTree.Clear();
-            CurrentSystemStatus.GetSS.Tree.Clear();
             Converters.GetConverters.ConvertDataTableToTree(DT);
-            foreach (TreeViewModal tvm in CurrentSystemStatus.GetSS.OldTree) CurrentSystemStatus.GetSS.Tree.Add(tvm.Clone);
+            CurrentSystemStatus.GetSS.Tree = new ObservableCollection<TreeViewModal>(CurrentSystemStatus.GetSS.OldTree);
         }
         public List<User> GetUsersAndPassword()
         {

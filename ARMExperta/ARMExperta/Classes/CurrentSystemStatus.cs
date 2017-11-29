@@ -12,13 +12,12 @@ namespace ARMExperta.Classes
     {
         ObservableCollection<TreeViewModal> tree = new ObservableCollection<TreeViewModal>();
         ObservableCollection<TreeViewModal> old_tree = new ObservableCollection<TreeViewModal>();
-        bool is_buffer = false,
-             is_save = true,
+        bool is_save = true,
              is_open = false,
              is_expert = false;
-        int current_pos;
+        int current_pos, id = 0;
         string current_file_path;
-        List<TreeViewModal> history = new List<TreeViewModal>();
+        List<ObservableCollection<TreeViewModal>> history = new List<ObservableCollection<TreeViewModal>>();
         User current_user;
         TreeViewModal current_element;
 
@@ -35,12 +34,16 @@ namespace ARMExperta.Classes
                 return current_sys_stat;
             }
         }
-    
+
         public ObservableCollection<TreeViewModal> Tree
         {
             get
             {
                 return tree;
+            }
+            set
+            {
+                tree = value;
             }
         }
         public ObservableCollection<TreeViewModal> OldTree
@@ -73,7 +76,7 @@ namespace ARMExperta.Classes
                 is_save = value;
                 OnPropertyChanged("Title");
             }
-          
+
         }
         public bool IsExpert
         {
@@ -96,17 +99,6 @@ namespace ARMExperta.Classes
             set
             {
                 current_element = value;
-            }
-        }
-        public bool IsBuffer
-        {
-            get
-            {
-                return is_buffer;
-            }
-            set
-            {
-                is_buffer = value;
             }
         }
         public User CurrentUser
@@ -138,7 +130,7 @@ namespace ARMExperta.Classes
             {
                 string title = "АРМ Эксперта ";
                 if (CurrentUser.IsGroup) title += " Группа : ";
-                title += "(" + CurrentUser.Naim + ")";  
+                title += "(" + CurrentUser.Naim + ")";
                 if (IsExpert) title += "(Эксперт)";
                 else title += "(Администратор)";
                 if (CurrentFilePath != null) title += CurrentFilePath;
@@ -152,8 +144,12 @@ namespace ARMExperta.Classes
             {
                 return current_pos;
             }
+            set
+            {
+                current_pos = value;
+            }
         }
-        public List<TreeViewModal> History
+        public List<ObservableCollection<TreeViewModal>> History
         {
             get
             {
@@ -163,7 +159,8 @@ namespace ARMExperta.Classes
 
         public void AddInHistory()
         {
-            history.Add(tree.First().Clone);
+            ObservableCollection<TreeViewModal> tmp = new ObservableCollection<TreeViewModal>(tree);
+            history.Add(tmp);
             current_pos = history.Count - 1;
         }
         public void OnPropertyChanged(string prop)
@@ -175,7 +172,26 @@ namespace ARMExperta.Classes
             int result = 0;
             foreach (TreeViewModal tvm in Tree)
                 if (tvm.Id > result) result = tvm.Id;
-            return result+1;
+            return result + 1;
+        }
+        public TreeViewModal CopySubTree(TreeViewModal root,int p_index)
+        {
+            TreeViewModal tmp = new TreeViewModal(root.Naim);
+            tmp.ParentId = p_index;
+            tmp.Id = GetNewId();
+            Tree.Add(tmp);
+            foreach (TreeViewModal tvm in root.Children) CopySubTree(tvm, tmp.Id);
+            return tmp;
+        }
+        public void SetLikeBuffer(TreeViewModal root)
+        {
+            root.IsBuffer = true;
+            foreach (TreeViewModal tvm in root.Children) SetLikeBuffer(tvm);
+        }
+        public void SetNoBuffer(TreeViewModal root)
+        {
+            root.IsBuffer = false;
+            foreach (TreeViewModal tvm in root.Children) SetLikeBuffer(tvm);
         }
     }
 }

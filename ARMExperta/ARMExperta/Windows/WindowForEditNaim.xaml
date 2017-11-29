@@ -7,8 +7,7 @@
         mc:Ignorable="d"
         Title="Введите наименование" 
         Height="100"
-        Width="300" 
-        Closing="Window_Closing">
+        Width="300">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="30"/>
