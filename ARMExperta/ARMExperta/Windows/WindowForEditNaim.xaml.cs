@@ -34,7 +34,11 @@ namespace ARMExperta.Windows
                 MessageBox.Show("Введите наименование поля");
                 textbox.Text = last_naim;
             }
-            else this.Close();
+            else
+            {
+                CurrentSystemStatus.GetSS.AddInHistory();
+                this.Close();
+            }
         }
 
         private void textbox_PreviewKeyDown(object sender, KeyEventArgs e)

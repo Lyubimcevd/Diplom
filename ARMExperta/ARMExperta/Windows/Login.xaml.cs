@@ -20,13 +20,14 @@ namespace ARMExperta.Windows
     {
         MainWindow MW;
         List<User> users;
+        List<string> logins;
 
         public Login()
         {
             InitializeComponent();
             
             users = Server.GetServer.GetUsersAndPassword();
-            List<string> logins = new List<string>();
+            logins = new List<string>();
             foreach (User user in users) logins.Add(user.Naim);
             combobox_login.ItemsSource = logins;
         }
@@ -54,6 +55,10 @@ namespace ARMExperta.Windows
         {
             Registration REG = new Registration();
             REG.ShowDialog();
+            users = Server.GetServer.GetUsersAndPassword();
+            logins = new List<string>();
+            foreach (User user in users) logins.Add(user.Naim);
+            combobox_login.ItemsSource = logins;
         }
     }
 }

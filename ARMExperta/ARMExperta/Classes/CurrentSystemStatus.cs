@@ -10,12 +10,11 @@ namespace ARMExperta.Classes
 {
     class CurrentSystemStatus : INotifyPropertyChanged
     {
-        ObservableCollection<TreeViewModal> tree = new ObservableCollection<TreeViewModal>();
+        ObservableCollection<TreeViewModal> tree;
         ObservableCollection<TreeViewModal> old_tree = new ObservableCollection<TreeViewModal>();
         bool is_save = true,
-             is_open = false,
              is_expert = false;
-        int current_pos, id = 0;
+        int current_pos;
         string current_file_path;
         List<ObservableCollection<TreeViewModal>> history = new List<ObservableCollection<TreeViewModal>>();
         User current_user;
@@ -53,18 +52,6 @@ namespace ARMExperta.Classes
                 return old_tree;
             }
         }
-        public bool IsOpen
-        {
-            get
-            {
-                return is_open;
-            }
-            set
-            {
-                is_open = value;
-                OnPropertyChanged("Title");
-            }
-        }
         public bool IsSave
         {
             get
@@ -88,6 +75,15 @@ namespace ARMExperta.Classes
             {
                 is_expert = value;
                 OnPropertyChanged("Title");
+            }
+        }
+        public bool IsBuffer
+        {
+            get
+            {
+                foreach (TreeViewModal tvm in Tree)
+                    if (tvm.IsBuffer) return true;
+                return false;
             }
         }
         public TreeViewModal CurrentElement
@@ -192,6 +188,20 @@ namespace ARMExperta.Classes
         {
             root.IsBuffer = false;
             foreach (TreeViewModal tvm in root.Children) SetLikeBuffer(tvm);
+        }
+        public void DeleteOldBuffer()
+        {
+            foreach(TreeViewModal tvm in Tree)
+                if (tvm.Parent == null&&tvm.IsBuffer)
+                {
+                    DeleteSubTree(tvm);
+                    break;
+                }
+        }
+        public void DeleteSubTree(TreeViewModal root)
+        {
+            foreach (TreeViewModal tvm in root.Children) DeleteSubTree(tvm);
+            Tree.Remove(root);
         }
     }
 }

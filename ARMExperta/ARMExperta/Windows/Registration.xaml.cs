@@ -54,9 +54,9 @@ namespace ARMExperta.Windows
             }
             if (listbox_list_of_new_group.Items.Count!=0&&textbox_password.Text.Length!=0)
             {
-                string ids = "";
-                foreach (string fio in listbox_list_of_new_group.Items) ids += Server.GetServer.GetStudentId(fio);
-                Server.GetServer.SetStudentsGroup(ids, textbox_password.Text);
+                List<string> students = new List<string>();
+                foreach (string fio in listbox_list_of_new_group.Items) students.Add(fio);
+                Server.GetServer.SetStudentsGroup(students, textbox_password.Text);
                 MessageBox.Show("Группа зарегестрирована");
             }
         }

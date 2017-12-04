@@ -18,9 +18,6 @@
         <CommandBinding Command="Save" 
                         Executed="CommandBinding_Save"
                         CanExecute="Save_CanExecute"/>
-        <CommandBinding Command="SaveAs" 
-                        Executed="CommandBinding_SaveAs"
-                        CanExecute="SaveAs_CanExecute"/>
         <CommandBinding Command="Cut" 
                         Executed="CommandBinding_Cut"
                         CanExecute="Cut_CanExecute"/>

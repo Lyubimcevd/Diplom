@@ -29,7 +29,7 @@ namespace ARMExperta.Classes
             {
                 TreeViewModal tmp = new TreeViewModal();
                 tmp.Id = Convert.ToInt32(DR["id"]);
-                if (DR["par"] != DBNull.Value) tmp.ParentId = Convert.ToInt32(DR["par"]);
+                if (DR["par_id"] != DBNull.Value) tmp.ParentId = Convert.ToInt32(DR["par_id"]);
                 tmp.Naim = DR["naim"].ToString();
                 if (DR["admin_coef"] != DBNull.Value) tmp.AdminCoeff = Convert.ToInt32(DR["admin_coef"]);
                 if (DR["expert_opin"] != DBNull.Value) tmp.ExpertOpinion = Convert.ToInt32(DR["naim"]);

@@ -31,33 +31,23 @@ namespace ARMExperta.Windows
 
         void CommandBinding_New(object sender, ExecutedRoutedEventArgs e)
         {
-            if (!CurrentSystemStatus.GetSS.IsSave)
-            {
-                result = System.Windows.MessageBox.Show("Сохранить изменения?", "АРМ Эксперта Редактор", MessageBoxButton.YesNoCancel);
-                if (result == MessageBoxResult.Yes) CommandBinding_Save(null, null);
-                if (result == MessageBoxResult.Cancel) return;
-            }
-            CurrentSystemStatus.GetSS.Tree.Clear();
-            CurrentSystemStatus.GetSS.Tree.Add(new TreeViewModal("Показатели качества"));
-            Root = new ObservableCollection<TreeViewModal>();
-            Root.Add(CurrentSystemStatus.GetSS.Tree.First());
-            tree.ItemsSource = Root;
-            CurrentSystemStatus.GetSS.AddInHistory();        
+            if (CheckSave()) StartWork();
         }
 
         void CommandBinding_Open(object sender, ExecutedRoutedEventArgs e)
         {
-            
+            if (CheckSave())
+            {
+                Server.GetServer.GetModalByUser(CurrentSystemStatus.GetSS.CurrentUser);
+                StartWork();
+            }    
         }
 
         void CommandBinding_Save(object sender, ExecutedRoutedEventArgs e)
         {
-
-        }
-
-        void CommandBinding_SaveAs(object sender, ExecutedRoutedEventArgs e)
-        {
-            
+            Server.GetServer.SaveOnServer();
+            MessageBox.Show("Сохранено","АРМ Эксперта");
+            CurrentSystemStatus.GetSS.IsSave = true;
         }
 
         void CommandBinding_Undo(object sender, ExecutedRoutedEventArgs e)
@@ -78,26 +68,32 @@ namespace ARMExperta.Windows
 
         void CommandBinding_Cut(object sender, ExecutedRoutedEventArgs e)
         {
+            CurrentSystemStatus.GetSS.DeleteOldBuffer();
             CurrentSystemStatus.GetSS.CurrentElement.ParentId = -1;
             CurrentSystemStatus.GetSS.SetLikeBuffer(CurrentSystemStatus.GetSS.CurrentElement);
+            CurrentSystemStatus.GetSS.AddInHistory();
             Root[0].Update();
             CurrentSystemStatus.GetSS.IsSave = false;
         }
 
         void CommandBinding_Copy(object sender, ExecutedRoutedEventArgs e)
         {
-            CurrentSystemStatus.GetSS.CopySubTree(CurrentSystemStatus.GetSS.CurrentElement, -1);
-            CurrentSystemStatus.GetSS.SetLikeBuffer(CurrentSystemStatus.GetSS.CurrentElement);
+            CurrentSystemStatus.GetSS.DeleteOldBuffer();
+            CurrentSystemStatus.GetSS.SetLikeBuffer(CurrentSystemStatus.GetSS.CopySubTree(CurrentSystemStatus.GetSS.CurrentElement, -1));
         }
 
         void CommandBinding_Paste(object sender, ExecutedRoutedEventArgs e)
         {
+            TreeViewModal tmp = null;
             foreach (TreeViewModal tvm in CurrentSystemStatus.GetSS.Tree)
                 if (tvm.Parent == null && tvm.IsBuffer)
                 {
                     tvm.ParentId = CurrentSystemStatus.GetSS.CurrentElement.Id;
                     CurrentSystemStatus.GetSS.SetNoBuffer(tvm);
+                    tmp = tvm;
                 }
+            CurrentSystemStatus.GetSS.SetLikeBuffer(CurrentSystemStatus.GetSS.CopySubTree(tmp, -1));
+            CurrentSystemStatus.GetSS.AddInHistory();
             Root[0].Update();
             CurrentSystemStatus.GetSS.IsSave = false;
         }
@@ -113,6 +109,7 @@ namespace ARMExperta.Windows
         void CommandBinding_Delete(object sender, ExecutedRoutedEventArgs e)
         {
             CurrentSystemStatus.GetSS.DeleteSubTree(CurrentSystemStatus.GetSS.CurrentElement);
+            CurrentSystemStatus.GetSS.AddInHistory();
             Root[0].Update();
             CurrentSystemStatus.GetSS.IsSave = false;
         }
@@ -124,7 +121,7 @@ namespace ARMExperta.Windows
 
         void CommandBinding_Close(object sender, ExecutedRoutedEventArgs e)
         {
-            this.Close();
+            if (CheckSave()) this.Close();
         }
 
         #endregion
@@ -134,11 +131,6 @@ namespace ARMExperta.Windows
         private void Save_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
             e.CanExecute = !CurrentSystemStatus.GetSS.IsSave;
-        }
-
-        private void SaveAs_CanExecute(object sender, CanExecuteRoutedEventArgs e)
-        {
-            e.CanExecute = CurrentSystemStatus.GetSS.IsOpen;
         }
 
         private void Cut_CanExecute(object sender, CanExecuteRoutedEventArgs e)
@@ -155,7 +147,7 @@ namespace ARMExperta.Windows
 
         private void Paste_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
-            if (CurrentSystemStatus.GetSS.CurrentElement != null&& CurrentSystemStatus.GetSS.Buffer!=null) e.CanExecute = true;
+            if (CurrentSystemStatus.GetSS.CurrentElement != null&&CurrentSystemStatus.GetSS.IsBuffer) e.CanExecute = true;
             else e.CanExecute = false;
         }
 
@@ -221,5 +213,28 @@ namespace ARMExperta.Windows
             CurrentSystemStatus.GetSS.CurrentElement = (sender as TextBlock).DataContext as TreeViewModal;
             if (e.ClickCount == 2) CommandBinding_Rename(null, null);
         }      
+
+        bool CheckSave()
+        {
+            if (!CurrentSystemStatus.GetSS.IsSave)
+            {
+                result = MessageBox.Show("Сохранить изменения?", "АРМ Эксперта", MessageBoxButton.YesNoCancel);
+                if (result == MessageBoxResult.Yes) CommandBinding_Save(null, null);
+                if (result == MessageBoxResult.Cancel) return false;
+                else return true;
+            }
+            else return true;
+        }
+
+        void StartWork()
+        {
+            CurrentSystemStatus.GetSS.History.Clear();
+            CurrentSystemStatus.GetSS.Tree = new ObservableCollection<TreeViewModal>(CurrentSystemStatus.GetSS.OldTree);
+            CurrentSystemStatus.GetSS.Tree.Insert(0,new TreeViewModal("Показатели качества"));
+            Root = new ObservableCollection<TreeViewModal>();
+            Root.Add(CurrentSystemStatus.GetSS.Tree.First());
+            tree.ItemsSource = Root;
+            CurrentSystemStatus.GetSS.AddInHistory();
+        }
     }
 }

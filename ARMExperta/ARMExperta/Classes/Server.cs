@@ -22,7 +22,7 @@ namespace ARMExperta.Classes
 
         Server()
         {
-            conn = new SqlConnection("user id=ldo;password=IfLyyz4sCJ;server=nitel-hp;database=test1;MultipleActiveResultSets=True");
+            conn = new SqlConnection("Data Source=NITEL-HP;Initial Catalog=test1;uid=ldo;pwd=IfLyyz4sCJ;MultipleActiveResultSets=True");
             conn.Open();
         }
         public static Server GetServer
@@ -51,78 +51,69 @@ namespace ARMExperta.Classes
             }
             else return new List<object>();
         }
-
         public void GetModalByUser(User user)
         {
-            DA = new SqlDataAdapter("select * from modals where group_id = "+user.Id.ToString()+" and is_group = "+user.IsGroup.ToString(), conn);
+            DA = new SqlDataAdapter("select * from models where group_id = "+user.Id.ToString()+" and is_group = '"+user.IsGroup.ToString()+"'", conn);
             CB = new SqlCommandBuilder(DA);
             DT = new DataTable();
             DA.Fill(DT);
             CurrentSystemStatus.GetSS.OldTree.Clear();
             Converters.GetConverters.ConvertDataTableToTree(DT);
-            CurrentSystemStatus.GetSS.Tree = new ObservableCollection<TreeViewModal>(CurrentSystemStatus.GetSS.OldTree);
         }
         public List<User> GetUsersAndPassword()
         {
-            tmp = ExecuteCommand("select fio,id,pwd from prep");
-            string[] mas;
             List<User> result = new List<User>();
-            for (int i = 0; i < tmp.Count; i += 3) result.Add(new User(tmp[i].ToString(), Convert.ToInt32(tmp[i + 1]),tmp[i+2].ToString(),false));
-            tmp = ExecuteCommand("select id_uch,id,pwd from work_group");
+            tmp = ExecuteCommand("select id,fio,pwd from prep");
+            for (int i = 0; i < tmp.Count; i += 3) result.Add(new User(tmp[i + 1].ToString(), Convert.ToInt32(tmp[i]), tmp[i + 2].ToString(), false));
+            tmp = ExecuteCommand("select id,pwd from work_group");
+            List<object> tmp1 = new List<object>();
             string login;
-            for (int i = 0; i < tmp.Count; i += 3)
+            for (int i = 0; i < tmp.Count; i+=2)
             {
                 login = "";
-                mas = (tmp[i] as string).Split(',');
-                foreach (string id in mas)
-                    login += ExecuteCommand("select fio from group_id_fio where id = " + id)[0].ToString() + ",";
-                login = login.Remove(login.Length - 1);
-                result.Add(new User(login, Convert.ToInt32(tmp[i + 1]),tmp[i+2].ToString(),true));
-            }
+                tmp1 = ExecuteCommand("select fio from students where work_group = " + Convert.ToInt32(tmp[0]));
+                foreach (string fio in tmp1) login += fio + "; ";
+                login = login.Remove(login.Length - 2);
+                result.Add(new User(login, Convert.ToInt32(tmp[0]), tmp[1].ToString(), true));
+            }         
             return result;
         }
         public List<string> GetGroups()
         {
             List<string> result = new List<string>();
-            tmp = ExecuteCommand("select distinct ed_group from group_id_fio");
+            tmp = ExecuteCommand("select naim from ed_group");
             foreach (string group in tmp) result.Add(group);
             return result;
         }
         public List<string> GetStudentsFromGroup(string group)
         {
             List<string> result = new List<string>();
-            tmp = ExecuteCommand("select fio from group_id_fio where ed_group = '" + group +"'");
+            tmp = ExecuteCommand("select fio from students inner join ed_group on students.ed_group = ed_group.Id where ed_group.naim = '" + group + "'");
             foreach (string student in tmp) result.Add(student);
             return result;
         }
-        public string GetStudentId(string fio)
-        {
-            return ExecuteCommand("select id from group_id_fio where fio = " + fio)[0].ToString();
-        }
-        public string GetGroupByGroupId(int group_id)
-        {
-            string result = "";          
-            tmp = ExecuteCommand("select id_uch from work_group where id = " + group_id.ToString());              
-            string[] mas = (tmp[0] as string).Split(',');
-            foreach (string id in mas)
-                result += ExecuteCommand("select fio from group_id_fio where id = " + id)[0] as string + ",";
-            return result.Remove(result.Length - 1);
-        }
 
-        public void SetStudentsGroup(string ids,string pwd)
+        public void SetStudentsGroup(List<string> students,string pwd)
         {
-            ExecuteCommand("INSERT INTO work_group (id_uch,is_ready,pwd) VALUES ('" + ids + "'," + 0 + ",'" + pwd + "')");
+            tmp = ExecuteCommand("select max(id) from work_group");
+            int id;
+            if (tmp[0] == null) id = 1;
+            else id = Convert.ToInt32(tmp[0]) + 1;
+            ExecuteCommand("insert into work_group (id,pwd) values (" + id + ",'" + pwd + "')");
+            foreach (string fio in students)
+                ExecuteCommand("update students set work_group = " + id + " where fio = '" + fio + "'");
         }
         public void SaveOnServer()
         {
             foreach (TreeViewModal tvm in CurrentSystemStatus.GetSS.Tree)
-                if (CurrentSystemStatus.GetSS.OldTree.FirstOrDefault(x=>x.Id == tvm.Id)!=null)
-                    ExecuteCommand("update models set p_id = " + tvm.Parent.Id+ ",naim = " + tvm.Naim + ",admin_coef = " + tvm.AdminCoeff
-                        + ",expert_opin = " + tvm.ExpertOpinion + "where id = " + tvm.Id);
-                else
-                    ExecuteCommand("INSERT INTO models(id,p_id,group_id,naim,admin_coef,expert_opin,is_group) VALUES (" + tvm.Id + ","
-                        + tvm.Parent.Id + "," + CurrentSystemStatus.GetSS.CurrentUser.Id + ",'" + tvm.Naim + "'," + tvm.AdminCoeff + ","
-                        + tvm.ExpertOpinion + "," + CurrentSystemStatus.GetSS.CurrentUser.IsGroup);
+                if (!tvm.IsBuffer&&tvm.Parent!=null)
+                    if (CurrentSystemStatus.GetSS.OldTree.FirstOrDefault(x=>x.Id == tvm.Id)!=null)
+                        ExecuteCommand("update models set par_id = " + tvm.Parent.Id+ ",naim = " + tvm.Naim + ",admin_coef = " + tvm.AdminCoeff
+                            + ",expert_opin = " + tvm.ExpertOpinion + "where id = " + tvm.Id);
+                    else
+                        ExecuteCommand("INSERT INTO models(id,par_id,group_id,naim,admin_coef,expert_opin,is_group) VALUES (" + tvm.Id + ","
+                            + tvm.Parent.Id + "," + CurrentSystemStatus.GetSS.CurrentUser.Id + ",'" + tvm.Naim + "'," + tvm.AdminCoeff + ","
+                            + tvm.ExpertOpinion + ",'" + CurrentSystemStatus.GetSS.CurrentUser.IsGroup + "')");
         }
     }
 }
