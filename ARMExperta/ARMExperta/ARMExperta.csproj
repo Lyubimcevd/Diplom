@@ -84,6 +84,9 @@
     <Compile Include="Windows\Registration.xaml.cs">
       <DependentUpon>Registration.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Windows\SliderWindow.xaml.cs">
+      <DependentUpon>SliderWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Windows\WindowForEditNaim.xaml.cs">
       <DependentUpon>WindowForEditNaim.xaml</DependentUpon>
     </Compile>
@@ -108,6 +111,10 @@
     <Page Include="Windows\Registration.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Windows\SliderWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Windows\WindowForEditNaim.xaml">
       <Generator>MSBuild:Compile</Generator>

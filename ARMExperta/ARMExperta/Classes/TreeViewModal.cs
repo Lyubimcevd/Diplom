@@ -9,8 +9,8 @@ namespace ARMExperta.Classes
     public class TreeViewModal:INotifyPropertyChanged
     {
         string naim;
-        int expert_opinion,
-            admin_coeff,
+        int expert_opinion = -1,
+            admin_coeff = -1,
             max = 100,
             id,
             par_id;

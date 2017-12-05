@@ -43,6 +43,16 @@
         <CommandBinding Command="Delete" 
                         Executed="CommandBinding_Delete"
                         CanExecute="Delete_CanExecute"/>
+        <CommandBinding Command="classes:Commands.Estimate" 
+                        Executed="CommandBinding_Estimate"
+                        CanExecute="Estimate_CanExecute"/>
+        <CommandBinding Command="classes:Commands.About" 
+                        Executed="CommandBinding_About"/>
+        <CommandBinding Command="classes:Commands.AddElement" 
+                        Executed="CommandBinding_AddElement"
+                        CanExecute="AddElement_CanExecute"/>
+        <CommandBinding Command="classes:Commands.ChangeWorkMode" 
+                        Executed="CommandBinding_ChangeWorkMode"/>
     </Window.CommandBindings>
     <Window.InputBindings>
         <KeyBinding Command="classes:Commands.Forward" 
@@ -52,7 +62,7 @@
     <Window.Resources>
         <ContextMenu x:Key="Context_menu_mvm">
             <MenuItem Header="Новый лист" 
-                      Click="Add_New_Element"/>
+                      Command="classes:Commands.AddElement"/>
             <Separator/>
             <MenuItem Header="Вырезать" 
                       Command="Cut"/>
@@ -62,6 +72,8 @@
                       Command="Paste"/>
             <MenuItem Header="Переименовать" 
                       Command="classes:Commands.Rename"/>
+            <MenuItem Header="Оценить" 
+                      Command="classes:Commands.Estimate"/>
         </ContextMenu>
     </Window.Resources>
     <Grid>
@@ -81,7 +93,8 @@
                 <MenuItem Header="Сохранить как..." 
                           Command="SaveAs"/>
                 <Separator/>
-                <MenuItem Header="Режим работы"/>
+                <MenuItem Header="Режим работы"
+                          Command="classes:Commands.ChangeWorkMode"/>
                 <Separator/>
                 <MenuItem Header="Печать отчёта" 
                           Command="Print"/>
@@ -90,6 +103,11 @@
                           Command="Close"/>
             </MenuItem>
             <MenuItem Header="Изменить">
+                <MenuItem Header="Новый лист" 
+                          Command="classes:Commands.AddElement"/>
+                <MenuItem Header="Оценить" 
+                          Command="classes:Commands.Estimate"/>
+                <Separator/>
                 <MenuItem Header="Отменить" 
                           Command="Undo"/>
                 <MenuItem Header="Вернуть" 
@@ -104,13 +122,15 @@
                           Command="Paste"/>
                 <MenuItem Header="Удалить" 
                           Command="Delete"/>
+                <MenuItem Header="Переименовать" 
+                          Command="classes:Commands.Rename"/>
             </MenuItem>
             <MenuItem Header="Справка">
                 <MenuItem Header="Просмотр справки"
                           Command="Help"/>
                 <Separator/>
                 <MenuItem Header="О программе АРМ Эксперта Редактор" 
-                          Click="About_Click"/>
+                          Command="classes:Commands.About"/>
             </MenuItem>
         </Menu>
         <TreeView x:Name="tree"

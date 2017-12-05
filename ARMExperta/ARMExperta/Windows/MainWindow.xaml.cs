@@ -18,7 +18,6 @@ namespace ARMExperta.Windows
 {
     public partial class MainWindow : Window
     {
-        MessageBoxResult result;
         ObservableCollection<TreeViewModal> Root;
 
         public MainWindow()
@@ -71,9 +70,7 @@ namespace ARMExperta.Windows
             CurrentSystemStatus.GetSS.DeleteOldBuffer();
             CurrentSystemStatus.GetSS.CurrentElement.ParentId = -1;
             CurrentSystemStatus.GetSS.SetLikeBuffer(CurrentSystemStatus.GetSS.CurrentElement);
-            CurrentSystemStatus.GetSS.AddInHistory();
-            Root[0].Update();
-            CurrentSystemStatus.GetSS.IsSave = false;
+            Update();
         }
 
         void CommandBinding_Copy(object sender, ExecutedRoutedEventArgs e)
@@ -93,25 +90,27 @@ namespace ARMExperta.Windows
                     tmp = tvm;
                 }
             CurrentSystemStatus.GetSS.SetLikeBuffer(CurrentSystemStatus.GetSS.CopySubTree(tmp, -1));
-            CurrentSystemStatus.GetSS.AddInHistory();
-            Root[0].Update();
-            CurrentSystemStatus.GetSS.IsSave = false;
+            Update();
         }
 
         void CommandBinding_Rename(object sender, ExecutedRoutedEventArgs e)
         {
             WindowForEditNaim WFEN = new WindowForEditNaim(CurrentSystemStatus.GetSS.CurrentElement);
             WFEN.ShowDialog();
-            Root[0].Update();
+            Update();
+        }
+
+        void CommandBinding_Estimate(object sender, ExecutedRoutedEventArgs e)
+        {
+            SliderWindow SW = new SliderWindow();
+            SW.ShowDialog();
             CurrentSystemStatus.GetSS.IsSave = false;
         }
 
         void CommandBinding_Delete(object sender, ExecutedRoutedEventArgs e)
         {
             CurrentSystemStatus.GetSS.DeleteSubTree(CurrentSystemStatus.GetSS.CurrentElement);
-            CurrentSystemStatus.GetSS.AddInHistory();
-            Root[0].Update();
-            CurrentSystemStatus.GetSS.IsSave = false;
+            Update();
         }
 
         void CommandBinding_Help(object sender, ExecutedRoutedEventArgs e)
@@ -122,6 +121,31 @@ namespace ARMExperta.Windows
         void CommandBinding_Close(object sender, ExecutedRoutedEventArgs e)
         {
             if (CheckSave()) this.Close();
+        }
+
+        void CommandBinding_About(object sender, ExecutedRoutedEventArgs e)
+        {
+           
+        }
+
+        void CommandBinding_AddElement(object sender, ExecutedRoutedEventArgs e)
+        {
+            TreeViewModal tmp = new TreeViewModal();
+            WindowForEditNaim WFEN = new WindowForEditNaim(tmp);
+            WFEN.ShowDialog();
+            if (tmp.Naim != null)
+            {
+                tmp.Id = CurrentSystemStatus.GetSS.GetNewId();
+                tmp.ParentId = CurrentSystemStatus.GetSS.CurrentElement.Id;
+                CurrentSystemStatus.GetSS.Tree.Add(tmp);
+                Update();
+            }
+        }
+
+        void CommandBinding_ChangeWorkMode(object sender, ExecutedRoutedEventArgs e)
+        {
+            if (CheckSave())
+            CurrentSystemStatus.GetSS.IsExpert = !CurrentSystemStatus.GetSS.IsExpert;
         }
 
         #endregion
@@ -135,68 +159,72 @@ namespace ARMExperta.Windows
 
         private void Cut_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
-            if (CurrentSystemStatus.GetSS.CurrentElement != null) e.CanExecute = true;
+            if (CurrentSystemStatus.GetSS.CurrentElement != null
+                &&!CurrentSystemStatus.GetSS.IsExpert
+                &&CurrentSystemStatus.GetSS.CurrentElement.Parent != null) e.CanExecute = true;
             else e.CanExecute = false;
         }
 
         private void Copy_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
-            if (CurrentSystemStatus.GetSS.CurrentElement != null) e.CanExecute = true;
+            if (CurrentSystemStatus.GetSS.CurrentElement != null
+                &&!CurrentSystemStatus.GetSS.IsExpert
+                &&CurrentSystemStatus.GetSS.CurrentElement.Parent != null) e.CanExecute = true;
             else e.CanExecute = false;
         }
 
         private void Paste_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
-            if (CurrentSystemStatus.GetSS.CurrentElement != null&&CurrentSystemStatus.GetSS.IsBuffer) e.CanExecute = true;
+            if (CurrentSystemStatus.GetSS.CurrentElement != null
+                &&CurrentSystemStatus.GetSS.IsBuffer
+                &&!CurrentSystemStatus.GetSS.IsExpert) e.CanExecute = true;
             else e.CanExecute = false;
         }
 
         private void Rename_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
-            if (CurrentSystemStatus.GetSS.CurrentElement != null) e.CanExecute = true;
+            if (CurrentSystemStatus.GetSS.CurrentElement != null
+                &&!CurrentSystemStatus.GetSS.IsExpert
+                &&CurrentSystemStatus.GetSS.CurrentElement.Parent != null) e.CanExecute = true;
+            else e.CanExecute = false;
+        }
+
+        private void Estimate_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            if (CurrentSystemStatus.GetSS.CurrentElement != null
+                &&CurrentSystemStatus.GetSS.CurrentElement.Parent != null) e.CanExecute = true;
             else e.CanExecute = false;
         }
 
         private void Undo_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
-            if (CurrentSystemStatus.GetSS.CurrentPosInHistory > 0) e.CanExecute = true;
+            if (CurrentSystemStatus.GetSS.CurrentPosInHistory > 0
+                &&!CurrentSystemStatus.GetSS.IsExpert) e.CanExecute = true;
             else e.CanExecute = false;
         }
 
         private void Forward_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
-            if (CurrentSystemStatus.GetSS.CurrentPosInHistory < CurrentSystemStatus.GetSS.History.Count-1)
-            e.CanExecute = true;
+            if ((CurrentSystemStatus.GetSS.CurrentPosInHistory < CurrentSystemStatus.GetSS.History.Count - 1)&&!CurrentSystemStatus.GetSS.IsExpert) e.CanExecute = true;
+            else e.CanExecute = false;
         }
 
         private void Delete_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
-            if (CurrentSystemStatus.GetSS.CurrentElement != null) e.CanExecute = true;
+            if (CurrentSystemStatus.GetSS.CurrentElement != null
+                &&!CurrentSystemStatus.GetSS.IsExpert
+                &&CurrentSystemStatus.GetSS.CurrentElement.Parent != null) e.CanExecute = true;
+            else e.CanExecute = false;
+        }
+
+        private void AddElement_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            if (CurrentSystemStatus.GetSS.CurrentElement != null
+                &&!CurrentSystemStatus.GetSS.IsExpert) e.CanExecute = true;
             else e.CanExecute = false;
         }
 
         #endregion
-
-        private void About_Click(object sender, RoutedEventArgs e)
-        {
-           
-        }
-
-        private void Add_New_Element(object sender, RoutedEventArgs e)
-        {
-            TreeViewModal tmp = new TreeViewModal();
-            WindowForEditNaim WFEN = new WindowForEditNaim(tmp);
-            WFEN.ShowDialog();
-            if (tmp.Naim != null)
-            {
-                tmp.Id = CurrentSystemStatus.GetSS.GetNewId();
-                tmp.ParentId = CurrentSystemStatus.GetSS.CurrentElement.Id;
-                CurrentSystemStatus.GetSS.Tree.Add(tmp);
-                Root[0].Update();
-                CurrentSystemStatus.GetSS.AddInHistory();
-                CurrentSystemStatus.GetSS.IsSave = false;
-            }
-        }
 
         private void TreeViewItemCollapsed(object sender, RoutedEventArgs e)
         {
@@ -211,17 +239,23 @@ namespace ARMExperta.Windows
         private void TextBlock_PreviewMouseButtonDown(object sender, MouseButtonEventArgs e)
         {
             CurrentSystemStatus.GetSS.CurrentElement = (sender as TextBlock).DataContext as TreeViewModal;
-            if (e.ClickCount == 2) CommandBinding_Rename(null, null);
+            if (e.ChangedButton == MouseButton.Left
+                &&CurrentSystemStatus.GetSS.CurrentElement.Parent != null)
+                if (e.ClickCount == 2) CommandBinding_Estimate(null, null);
         }      
 
         bool CheckSave()
         {
             if (!CurrentSystemStatus.GetSS.IsSave)
             {
-                result = MessageBox.Show("Сохранить изменения?", "АРМ Эксперта", MessageBoxButton.YesNoCancel);
+                MessageBoxResult result = MessageBox.Show("Сохранить изменения?", "АРМ Эксперта", MessageBoxButton.YesNoCancel);
                 if (result == MessageBoxResult.Yes) CommandBinding_Save(null, null);
                 if (result == MessageBoxResult.Cancel) return false;
-                else return true;
+                else
+                {
+                    CurrentSystemStatus.GetSS.IsSave = true;
+                    return true;
+                }
             }
             else return true;
         }
@@ -235,6 +269,13 @@ namespace ARMExperta.Windows
             Root.Add(CurrentSystemStatus.GetSS.Tree.First());
             tree.ItemsSource = Root;
             CurrentSystemStatus.GetSS.AddInHistory();
+        }
+
+        void Update()
+        {
+            Root[0].Update();
+            CurrentSystemStatus.GetSS.AddInHistory();
+            CurrentSystemStatus.GetSS.IsSave = false;
         }
     }
 }

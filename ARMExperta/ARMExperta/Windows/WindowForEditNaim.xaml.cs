@@ -1,16 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
+﻿using System.Windows;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using ARMExperta.Classes;
 
 namespace ARMExperta.Windows
@@ -19,11 +8,11 @@ namespace ARMExperta.Windows
     {
         string last_naim;
 
-        public WindowForEditNaim(TreeViewModal list)
+        public WindowForEditNaim(TreeViewModal tvm)
         {
             InitializeComponent();
-            textbox.DataContext = list;
-            last_naim = list.Naim;
+            last_naim = tvm.Naim;
+            textbox.DataContext = tvm;
             Loaded += delegate { textbox.Focus(); };
         }
 
@@ -33,11 +22,6 @@ namespace ARMExperta.Windows
             {
                 MessageBox.Show("Введите наименование поля");
                 textbox.Text = last_naim;
-            }
-            else
-            {
-                CurrentSystemStatus.GetSS.AddInHistory();
-                this.Close();
             }
         }
 
@@ -49,6 +33,11 @@ namespace ARMExperta.Windows
         private void textbox_GotFocus(object sender, RoutedEventArgs e)
         {
             textbox.SelectAll();
+        }
+
+        private void Window_Closed(object sender, System.EventArgs e)
+        {
+            textbox.Text = null;
         }
     }
 }

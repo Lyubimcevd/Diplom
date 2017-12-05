@@ -22,7 +22,7 @@ namespace ARMExperta.Classes
 
         Server()
         {
-            conn = new SqlConnection("Data Source=NITEL-HP;Initial Catalog=test1;uid=ldo;pwd=IfLyyz4sCJ;MultipleActiveResultSets=True");
+            conn = new SqlConnection("Data Source=DESKTOP-7EANOPF;Initial Catalog=ARMExperta;Integrated Security=true;MultipleActiveResultSets=True");
             conn.Open();
         }
         public static Server GetServer
@@ -108,7 +108,7 @@ namespace ARMExperta.Classes
             foreach (TreeViewModal tvm in CurrentSystemStatus.GetSS.Tree)
                 if (!tvm.IsBuffer&&tvm.Parent!=null)
                     if (CurrentSystemStatus.GetSS.OldTree.FirstOrDefault(x=>x.Id == tvm.Id)!=null)
-                        ExecuteCommand("update models set par_id = " + tvm.Parent.Id+ ",naim = " + tvm.Naim + ",admin_coef = " + tvm.AdminCoeff
+                        ExecuteCommand("update models set par_id = " + tvm.Parent.Id+ ",naim = '" + tvm.Naim + "',admin_coef = " + tvm.AdminCoeff
                             + ",expert_opin = " + tvm.ExpertOpinion + "where id = " + tvm.Id);
                     else
                         ExecuteCommand("INSERT INTO models(id,par_id,group_id,naim,admin_coef,expert_opin,is_group) VALUES (" + tvm.Id + ","

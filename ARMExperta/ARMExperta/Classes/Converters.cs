@@ -32,7 +32,7 @@ namespace ARMExperta.Classes
                 if (DR["par_id"] != DBNull.Value) tmp.ParentId = Convert.ToInt32(DR["par_id"]);
                 tmp.Naim = DR["naim"].ToString();
                 if (DR["admin_coef"] != DBNull.Value) tmp.AdminCoeff = Convert.ToInt32(DR["admin_coef"]);
-                if (DR["expert_opin"] != DBNull.Value) tmp.ExpertOpinion = Convert.ToInt32(DR["naim"]);
+                if (DR["expert_opin"] != DBNull.Value) tmp.ExpertOpinion = Convert.ToInt32(DR["expert_opin"]);
                 CurrentSystemStatus.GetSS.OldTree.Add(tmp);
             }
         }
