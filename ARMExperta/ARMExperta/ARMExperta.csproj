@@ -54,6 +54,11 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.Office.Interop.Word, Version=15.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+      <HintPath>.\Microsoft.Office.Interop.Word.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
@@ -76,6 +81,7 @@
     </ApplicationDefinition>
     <Compile Include="Classes\Commands.cs" />
     <Compile Include="Classes\CurrentSystemStatus.cs" />
+    <Compile Include="Classes\Print.cs" />
     <Compile Include="Classes\TreeViewModal.cs" />
     <Compile Include="Classes\User.cs" />
     <Compile Include="Windows\MainWindow.xaml.cs">
@@ -148,7 +154,6 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

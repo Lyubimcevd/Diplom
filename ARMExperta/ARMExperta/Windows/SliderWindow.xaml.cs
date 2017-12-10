@@ -15,7 +15,7 @@ namespace ARMExperta.Windows
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            CurrentSystemStatus.GetSS.CurrentElement.UpdateValues();
+            CurrentSystemStatus.GetSS.CurrentElement.UpdateReady();
         }
 
         private void TextBox_PreviewKeyDown(object sender, KeyEventArgs e)

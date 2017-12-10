@@ -39,6 +39,8 @@ namespace ARMExperta.Windows
             {
                 Server.GetServer.GetModalByUser(CurrentSystemStatus.GetSS.CurrentUser);
                 StartWork();
+                foreach (TreeViewModal tvm in CurrentSystemStatus.GetSS.Tree)
+                    if (tvm.Children.Count == 0) tvm.UpdateReady();
             }    
         }
 
@@ -148,6 +150,11 @@ namespace ARMExperta.Windows
             CurrentSystemStatus.GetSS.IsExpert = !CurrentSystemStatus.GetSS.IsExpert;
         }
 
+        void CommandBinding_Print(object sender, ExecutedRoutedEventArgs e)
+        {
+            Print.GetPrint.PrintDocument(Root[0]);
+        }
+
         #endregion
 
         #region CanExecute
@@ -192,7 +199,7 @@ namespace ARMExperta.Windows
         private void Estimate_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
             if (CurrentSystemStatus.GetSS.CurrentElement != null
-                &&CurrentSystemStatus.GetSS.CurrentElement.Parent != null) e.CanExecute = true;
+                &&CurrentSystemStatus.GetSS.CurrentElement.Children.Count == 0) e.CanExecute = true;
             else e.CanExecute = false;
         }
 
@@ -224,6 +231,12 @@ namespace ARMExperta.Windows
             else e.CanExecute = false;
         }
 
+        private void Print_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            if (CurrentSystemStatus.GetSS.IsExpert) e.CanExecute = true;
+            else e.CanExecute = false;
+        }
+
         #endregion
 
         private void TreeViewItemCollapsed(object sender, RoutedEventArgs e)
@@ -240,7 +253,7 @@ namespace ARMExperta.Windows
         {
             CurrentSystemStatus.GetSS.CurrentElement = (sender as TextBlock).DataContext as TreeViewModal;
             if (e.ChangedButton == MouseButton.Left
-                &&CurrentSystemStatus.GetSS.CurrentElement.Parent != null)
+                &&CurrentSystemStatus.GetSS.CurrentElement.Children.Count == 0)
                 if (e.ClickCount == 2) CommandBinding_Estimate(null, null);
         }      
 
@@ -276,6 +289,11 @@ namespace ARMExperta.Windows
             Root[0].Update();
             CurrentSystemStatus.GetSS.AddInHistory();
             CurrentSystemStatus.GetSS.IsSave = false;
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (!CheckSave()) e.Cancel = true; 
         }
     }
 }

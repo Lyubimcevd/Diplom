@@ -1,5 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Windows;
 using System.Linq;
@@ -17,7 +16,7 @@ namespace ARMExperta.Classes
         bool is_ready = false,
              is_expanded = true,
              is_buffer = false;
-
+             
         public event PropertyChangedEventHandler PropertyChanged;
 
         public TreeViewModal(string p_naim)
@@ -81,11 +80,15 @@ namespace ARMExperta.Classes
             get
             {
                 if (CurrentSystemStatus.GetSS.IsExpert)
-                    if (ExpertOpinion == -1) return 0;
+                {
+                    if (ExpertOpinion < 0) return 0;
                     else return ExpertOpinion;
+                }
                 else
-                    if (AdminCoeff == -1) return 0;
+                {
+                    if (AdminCoeff < 0) return 0;
                     else return AdminCoeff;
+                }
             }
             set
             {
@@ -98,6 +101,22 @@ namespace ARMExperta.Classes
                 else AdminCoeff = value;
                 OnPropertyChanged("ValueForSlider");
                 OnPropertyChanged("Color");
+            }
+        }
+        public bool IsTake
+        {
+            get
+            {
+                if (CurrentSystemStatus.GetSS.IsExpert)
+                {
+                    if (ExpertOpinion < 0) return false;
+                    else return true;
+                }
+                else
+                {
+                    if (AdminCoeff < 0) return false;
+                    else return true;
+                }
             }
         }
         public bool IsExpanded
@@ -143,8 +162,6 @@ namespace ARMExperta.Classes
             set
             {
                 is_ready = value;
-                if (is_ready&&CurrentSystemStatus.GetSS.IsExpert)
-                    if (ExpertOpinion==-1) MakeExpertOpinion();
                 OnPropertyChanged("Color");
             }
         }
@@ -165,7 +182,7 @@ namespace ARMExperta.Classes
             {
                 if (Is_Ready) return "green";
                 else
-                    if (ValueForSlider > 0) return "brown";
+                    if (IsTake) return "brown";
                     else return "black";
             }
         }
@@ -188,47 +205,30 @@ namespace ARMExperta.Classes
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
         }
-        public void UpdateValues()
+        public void UpdateReady()
         {
-            if (!CurrentSystemStatus.GetSS.IsExpert)
+            if (CurrentSystemStatus.GetSS.IsExpert)
             {
-                int sum = 100;          
+                bool tmp = true;
+                foreach (TreeViewModal child in Children)
+                    if (child.ExpertOpinion > 0) ExpertOpinion += child.ExpertOpinion * child.AdminCoeff / 100;
+                    else
+                    {
+                        tmp = false;
+                        break;
+                    }
+                if (ExpertOpinion > 0) Is_Ready = tmp;
+                else Is_Ready = false;
+            }
+            else
+            {              
+                int sum = 100;
                 foreach (TreeViewModal modal in Children) sum -= modal.ValueForSlider;
                 foreach (TreeViewModal modal in Children) modal.Max = sum + modal.ValueForSlider;
                 if (sum == 0)
                     foreach (TreeViewModal modal in Children) modal.Is_Ready = true;
-                if (Parent?.Parent == null)
-                    {
-                        bool is_all_ready = true;
-                        foreach (TreeViewModal modal in Children)
-                            if (!modal.Is_Ready)
-                            {
-                                is_all_ready = false;
-                                break;
-                            }
-                        if (is_all_ready) Is_Ready = true;
-                    }
-
             }
-            else
-            {
-                bool is_all_ready = true;
-                foreach (TreeViewModal child in Children)
-                    if (child.ExpertOpinion == -1)
-                    {
-                        is_all_ready = false;
-                        break;
-                    }
-                if (is_all_ready) Is_Ready = true;                
-            }
-            if (Parent != null) Parent.UpdateValues();
-        }
-        void MakeExpertOpinion()
-        {
-            foreach(TreeViewModal child in Children)
-            {
-                ExpertOpinion += child.ExpertOpinion * child.AdminCoeff/100;
-            }
+            if (Parent != null) Parent.UpdateReady();
         }
         public void Update()
         {

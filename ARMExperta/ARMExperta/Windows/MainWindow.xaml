@@ -9,7 +9,8 @@
         Title="{Binding Title}" 
         Height="300" 
         Width="300" 
-        WindowState="Maximized">
+        WindowState="Maximized" 
+        Closing="Window_Closing">
     <Window.CommandBindings>
         <CommandBinding Command="New" 
                         Executed="CommandBinding_New"/>
@@ -53,6 +54,9 @@
                         CanExecute="AddElement_CanExecute"/>
         <CommandBinding Command="classes:Commands.ChangeWorkMode" 
                         Executed="CommandBinding_ChangeWorkMode"/>
+        <CommandBinding Command="Print" 
+                        Executed="CommandBinding_Print"
+                        CanExecute="Print_CanExecute"/>
     </Window.CommandBindings>
     <Window.InputBindings>
         <KeyBinding Command="classes:Commands.Forward" 
@@ -90,8 +94,6 @@
                 <Separator/>
                 <MenuItem Header="Сохранить" 
                           Command="Save"/>
-                <MenuItem Header="Сохранить как..." 
-                          Command="SaveAs"/>
                 <Separator/>
                 <MenuItem Header="Режим работы"
                           Command="classes:Commands.ChangeWorkMode"/>
@@ -140,7 +142,8 @@
                     <TextBlock Text="{Binding Naim}"
                                ContextMenu="{StaticResource Context_menu_mvm}" 
                                PreviewMouseLeftButtonDown="TextBlock_PreviewMouseButtonDown" 
-                               PreviewMouseRightButtonDown="TextBlock_PreviewMouseButtonDown"/>
+                               PreviewMouseRightButtonDown="TextBlock_PreviewMouseButtonDown"
+                               Foreground="{Binding Color}"/>
                 </HierarchicalDataTemplate>
             </TreeView.ItemTemplate>
             <TreeView.ItemContainerStyle>
