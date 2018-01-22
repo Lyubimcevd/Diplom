@@ -11,6 +11,11 @@ namespace ARMExperta.Classes
         public static RoutedCommand About { get; set; }
         public static RoutedCommand ChangeWorkMode { get; set; }
         public static RoutedCommand AddElement { get; set; }
+        public static RoutedCommand EducationGroup { get; set; }
+        public static RoutedCommand WorkGroup { get; set; }
+        public static RoutedCommand Admins { get; set; }
+        public static RoutedCommand Check { get; set; }
+        public static RoutedCommand Ready { get; set; }
 
         static Commands()
         {
@@ -20,6 +25,11 @@ namespace ARMExperta.Classes
             About = new RoutedCommand("About", typeof(MainWindow));
             ChangeWorkMode = new RoutedCommand("ChangeWorkMode", typeof(MainWindow));
             AddElement = new RoutedCommand("AddElement", typeof(MainWindow));
+            EducationGroup = new RoutedCommand("EducationGroup", typeof(MainWindow));
+            WorkGroup = new RoutedCommand("WorkGroup", typeof(MainWindow));
+            Admins = new RoutedCommand("Admins", typeof(MainWindow));
+            Check = new RoutedCommand("Check", typeof(MainWindow));
+            Ready = new RoutedCommand("Ready", typeof(MainWindow));
         }
     }
 }

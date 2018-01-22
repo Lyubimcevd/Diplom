@@ -4,15 +4,21 @@ using ARMExperta.Classes;
 
 namespace ARMExperta.Windows
 {
-    public partial class WindowForEditNaim : Window
+    public partial class WindowForEdit : Window
     {
         string last_naim;
 
-        public WindowForEditNaim(TreeViewModal tvm)
+        public WindowForEdit()
         {
             InitializeComponent();
-            last_naim = tvm.Naim;
-            textbox.DataContext = tvm;
+            Loaded += delegate { textbox.Focus(); };
+        }
+
+        public WindowForEdit(string tmp)
+        {
+            InitializeComponent();
+            last_naim = tmp;
+            textbox.Text = tmp;
             Loaded += delegate { textbox.Focus(); };
         }
 
@@ -29,19 +35,22 @@ namespace ARMExperta.Windows
             }
         }
 
-        private void textbox_PreviewKeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Enter) Button_Click(null, null);
-        }
-
         private void textbox_GotFocus(object sender, RoutedEventArgs e)
         {
             textbox.SelectAll();
         }
 
-        private void Window_Closed(object sender, System.EventArgs e)
+        public string GetResult
         {
-            textbox.Text = null;
+            get
+            {
+                return textbox.Text;
+            }
+        }
+
+        private void textbox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter) Button_Click(null, null);
         }
     }
 }

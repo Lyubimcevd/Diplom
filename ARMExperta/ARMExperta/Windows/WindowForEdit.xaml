@@ -1,11 +1,11 @@
-﻿<Window x:Class="ARMExperta.Windows.WindowForEditNaim"
+﻿<Window x:Class="ARMExperta.Windows.WindowForEdit"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ARMExperta.Windows"
         mc:Ignorable="d"
-        Title="Введите наименование" 
+        Title="АРМ Эксперта" 
         Height="100"
         Width="300">
     <Grid>
@@ -14,8 +14,8 @@
             <RowDefinition/>
         </Grid.RowDefinitions>
         <TextBox x:Name="textbox"
-                 Text="{Binding Naim}" 
-                 PreviewKeyDown="textbox_PreviewKeyDown" GotFocus="textbox_GotFocus"/>
+                 GotFocus="textbox_GotFocus" 
+                 KeyDown="textbox_KeyDown"/>
         <Button Grid.Row="1" 
                 Content="Ввод" 
                 Click="Button_Click"/>

@@ -24,6 +24,8 @@ namespace ARMExperta.Windows
         {
             InitializeComponent();
             DataContext = CurrentSystemStatus.GetSS;
+            if (!CurrentSystemStatus.GetSS.CurrentUser.IsGroup) Admininstr.Visibility = Visibility.Visible;
+            else Ready.Visibility = Visibility.Visible;
         }
 
         #region CommandBinding
@@ -97,8 +99,9 @@ namespace ARMExperta.Windows
 
         void CommandBinding_Rename(object sender, ExecutedRoutedEventArgs e)
         {
-            WindowForEditNaim WFEN = new WindowForEditNaim(CurrentSystemStatus.GetSS.CurrentElement);
-            WFEN.ShowDialog();
+            WindowForEdit WFE = new WindowForEdit(CurrentSystemStatus.GetSS.CurrentElement.Naim);
+            WFE.ShowDialog();
+            CurrentSystemStatus.GetSS.CurrentElement.Naim = WFE.GetResult;
             Update();
         }
 
@@ -133,8 +136,9 @@ namespace ARMExperta.Windows
         void CommandBinding_AddElement(object sender, ExecutedRoutedEventArgs e)
         {
             TreeViewModal tmp = new TreeViewModal();
-            WindowForEditNaim WFEN = new WindowForEditNaim(tmp);
-            WFEN.ShowDialog();
+            WindowForEdit WFE = new WindowForEdit();
+            WFE.ShowDialog();
+            tmp.Naim = WFE.GetResult;
             if (tmp.Naim != null)
             {
                 tmp.Id = CurrentSystemStatus.GetSS.GetNewId();
@@ -153,6 +157,32 @@ namespace ARMExperta.Windows
         void CommandBinding_Print(object sender, ExecutedRoutedEventArgs e)
         {
             Print.GetPrint.PrintDocument(Root[0]);
+        }
+
+        void CommandBinding_Ready(object sender, ExecutedRoutedEventArgs e)
+        {
+            
+        }
+
+        void CommandBinding_EducationGroup(object sender, ExecutedRoutedEventArgs e)
+        {
+            EducationGroups EG = new EducationGroups();
+            EG.ShowDialog();
+        }
+
+        void CommandBinding_WorkGroup(object sender, ExecutedRoutedEventArgs e)
+        {
+         
+        }
+
+        void CommandBinding_Admins(object sender, ExecutedRoutedEventArgs e)
+        {
+          
+        }
+
+        void CommandBinding_Check(object sender, ExecutedRoutedEventArgs e)
+        {
+          
         }
 
         #endregion

@@ -30,6 +30,7 @@ namespace ARMExperta.Windows
             logins = new List<string>();
             foreach (User user in users) logins.Add(user.Naim);
             combobox_login.ItemsSource = logins;
+            combobox_login.SelectedIndex = 0;
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)

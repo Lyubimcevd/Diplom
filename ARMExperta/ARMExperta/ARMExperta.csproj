@@ -84,6 +84,9 @@
     <Compile Include="Classes\Print.cs" />
     <Compile Include="Classes\TreeViewModal.cs" />
     <Compile Include="Classes\User.cs" />
+    <Compile Include="Windows\EducationGroups.xaml.cs">
+      <DependentUpon>EducationGroups.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Windows\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </Compile>
@@ -93,9 +96,13 @@
     <Compile Include="Windows\SliderWindow.xaml.cs">
       <DependentUpon>SliderWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Windows\WindowForEditNaim.xaml.cs">
-      <DependentUpon>WindowForEditNaim.xaml</DependentUpon>
+    <Compile Include="Windows\WindowForEdit.xaml.cs">
+      <DependentUpon>WindowForEdit.xaml</DependentUpon>
     </Compile>
+    <Page Include="Windows\EducationGroups.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Windows\Login.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -122,7 +129,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Windows\WindowForEditNaim.xaml">
+    <Page Include="Windows\WindowForEdit.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

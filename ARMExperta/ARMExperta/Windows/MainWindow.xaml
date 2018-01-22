@@ -54,6 +54,16 @@
                         CanExecute="AddElement_CanExecute"/>
         <CommandBinding Command="classes:Commands.ChangeWorkMode" 
                         Executed="CommandBinding_ChangeWorkMode"/>
+        <CommandBinding Command="classes:Commands.EducationGroup" 
+                        Executed="CommandBinding_EducationGroup"/>
+        <CommandBinding Command="classes:Commands.WorkGroup" 
+                        Executed="CommandBinding_WorkGroup"/>
+        <CommandBinding Command="classes:Commands.Admins" 
+                        Executed="CommandBinding_Admins"/>
+        <CommandBinding Command="classes:Commands.Check" 
+                        Executed="CommandBinding_Check"/>
+        <CommandBinding Command="classes:Commands.Ready" 
+                        Executed="CommandBinding_Ready"/>
         <CommandBinding Command="Print" 
                         Executed="CommandBinding_Print"
                         CanExecute="Print_CanExecute"/>
@@ -133,6 +143,26 @@
                 <Separator/>
                 <MenuItem Header="О программе АРМ Эксперта Редактор" 
                           Command="classes:Commands.About"/>
+            </MenuItem>
+            <MenuItem Header="ГОТОВО" 
+                      Visibility="Collapsed"
+                      Command="classes:Commands.Ready"
+                      Name="Ready"/>
+            <MenuItem Header="Администрирование" 
+                      Name="Admininstr"
+                      Visibility="Collapsed">
+                <MenuItem Header="Учебные группы"
+                          Command="classes:Commands.EducationGroup"
+                          />
+                <MenuItem Header="Рабочие группы"
+                          Command="classes:Commands.WorkGroup"
+                         />
+                <MenuItem Header="Администраторы"
+                          Command="classes:Commands.Admins"
+                          />
+                <MenuItem Header="Проверка"
+                          Command="classes:Commands.Check"
+                         />
             </MenuItem>
         </Menu>
         <TreeView x:Name="tree"
