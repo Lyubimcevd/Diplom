@@ -10,13 +10,11 @@ namespace ARMExperta.Classes
 {
     class CurrentSystemStatus : INotifyPropertyChanged
     {
-        ObservableCollection<TreeViewModal> tree;
-        ObservableCollection<TreeViewModal> old_tree = new ObservableCollection<TreeViewModal>();
         bool is_save = true,
              is_expert = false;
         int current_pos;
         string current_file_path;
-        List<ObservableCollection<TreeViewModal>> history = new List<ObservableCollection<TreeViewModal>>();
+        List<Dictionary<int, TreeViewModal>> history = new List<Dictionary<int, TreeViewModal>>();
         User current_user;
         TreeViewModal current_element;
 
@@ -39,17 +37,6 @@ namespace ARMExperta.Classes
             get
             {
                 return tree;
-            }
-            set
-            {
-                tree = value;
-            }
-        }
-        public ObservableCollection<TreeViewModal> OldTree
-        {
-            get
-            {
-                return old_tree;
             }
         }
         public bool IsSave
@@ -132,24 +119,6 @@ namespace ARMExperta.Classes
                 if (CurrentFilePath != null) title += CurrentFilePath;
                 if (!IsSave) title += "*";
                 return title;
-            }
-        }
-        public int CurrentPosInHistory
-        {
-            get
-            {
-                return current_pos;
-            }
-            set
-            {
-                current_pos = value;
-            }
-        }
-        public List<ObservableCollection<TreeViewModal>> History
-        {
-            get
-            {
-                return history;
             }
         }
 

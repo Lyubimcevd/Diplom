@@ -13,6 +13,9 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using ARMExperta.Classes;
 using System.Collections.ObjectModel;
+using System.Windows.Forms;
+using System.Runtime.Serialization.Json;
+using System.IO;
 
 namespace ARMExperta.Windows
 {
@@ -177,7 +180,8 @@ namespace ARMExperta.Windows
 
         void CommandBinding_Admins(object sender, ExecutedRoutedEventArgs e)
         {
-          
+            Admins Adm = new Admins();
+            Adm.ShowDialog();
         }
 
         void CommandBinding_Check(object sender, ExecutedRoutedEventArgs e)
@@ -325,5 +329,31 @@ namespace ARMExperta.Windows
         {
             if (!CheckSave()) e.Cancel = true; 
         }
+
+        private void MenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog OFD = new OpenFileDialog();
+            OFD.Filter = "ГОСТ (*.gstx)|*.gstx|Все файлы (*.*)|*.*";
+            OFD.RestoreDirectory = true;
+
+            if (OFD.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                save_path = OFD.FileName;
+                DataContractJsonSerializer BF = new DataContractJsonSerializer(typeof(SaveClass));
+                using (FileStream fs = new FileStream(save_path, FileMode.Open))
+                {
+                    Root = new ObservableCollection<TreeViewModal>();
+                    Root.Add(new TreeViewModal(BF.ReadObject(fs) as SaveClass, null));
+                }
+                tree.ItemsSource = Root;
+                windows_title.Title = "АРМ Эксперта Редактор: " + OFD.FileName;
+
+                is_open = true;
+                is_save = true;
+                history = new List<TreeViewModal>();
+                Historian();
+                is_history_begin = true;
+                is_history_end = true;
+            }
     }
 }

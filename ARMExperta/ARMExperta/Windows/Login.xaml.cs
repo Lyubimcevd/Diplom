@@ -21,27 +21,35 @@ namespace ARMExperta.Windows
         MainWindow MW;
         List<User> users;
         List<string> logins;
+        bool flag_podtv_admin_roots = false,
+             return_flag = false;
 
         public Login()
         {
             InitializeComponent();
-            
-            users = Server.GetServer.GetUsersAndPassword();
-            logins = new List<string>();
-            foreach (User user in users) logins.Add(user.Naim);
-            combobox_login.ItemsSource = logins;
-            combobox_login.SelectedIndex = 0;
+            UpdateComboBox();          
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        public Login(bool flag)
+        {
+            InitializeComponent();
+            UpdateComboBox();
+            flag_podtv_admin_roots = true;
+        }
+
+        private void EnterInSystem(object sender, RoutedEventArgs e)
         {
             User current_user = users.FirstOrDefault(x => x.Naim == combobox_login.SelectedValue.ToString());
             if (textbox_password.Text == current_user.Password)
             {
-                CurrentSystemStatus.GetSS.CurrentUser = current_user;
-                MW = new MainWindow();
-                MW.Show();
+                if (!flag_podtv_admin_roots)
+                {
+                    CurrentSystemStatus.GetSS.CurrentUser = current_user;
+                    MW = new MainWindow();
+                    MW.Show();
+                }
                 this.Close();
+                return_flag = true;
             }
             else MessageBox.Show("Неверный пароль");
         }
@@ -49,17 +57,29 @@ namespace ARMExperta.Windows
         private void TextBox_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
-                Button_Click(null, null);
+                EnterInSystem(null, null);
         }
 
-        private void Button_Click_1(object sender, RoutedEventArgs e)
+        private void RegistrationInSystem(object sender, RoutedEventArgs e)
         {
             Registration REG = new Registration();
             REG.ShowDialog();
-            users = Server.GetServer.GetUsersAndPassword();
+            UpdateComboBox();
+        }
+
+        void UpdateComboBox()
+        {
+            users = Server.GetServer.GetWorkGroupsAndPassword();
+            users.AddRange(Server.GetServer.GetAdminsAndPassword());
             logins = new List<string>();
             foreach (User user in users) logins.Add(user.Naim);
             combobox_login.ItemsSource = logins;
+            combobox_login.SelectedIndex = 0;
         }
+
+        public bool GetRightRoots()
+        {
+            return return_flag;
+        }       
     }
 }

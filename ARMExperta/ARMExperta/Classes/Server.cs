@@ -59,23 +59,35 @@ namespace ARMExperta.Classes
         }
         int GetElementID(string table_naim,string column_naim,string element)
         {
-            return Convert.ToInt32(ExecuteCommand("select id from " + table_naim + " where " + column_naim + " = '" + element + "'")[0]);
+            List<object> tmp = ExecuteCommand("select id from " + table_naim + " where " + column_naim + " = '" + element + "'");
+            if (tmp.Count != 0) return Convert.ToInt32(tmp[0]);
+            else return -1;
         }
 
-        public void GetModalByUser(User user)
+        public Dictionary<int,TreeViewModal> GetModalByUser(User user)
         {
             DA = new SqlDataAdapter("select * from models where group_id = "+user.Id.ToString()+" and is_group = '"+user.IsGroup.ToString()+"'", conn);
             CB = new SqlCommandBuilder(DA);
             DT = new DataTable();
             DA.Fill(DT);
-            CurrentSystemStatus.GetSS.OldTree.Clear();
+            Dictionary<int, TreeViewModal> result = new Dictionary<int, TreeViewModal>();
+            for (int i = 0; i < DT.Rows.Count; i++)
+            {
+                int tmp = Convert.ToInt32(DT.Rows[i]["id"]);
+                result.Keys
+            }
+            result.Add(i, new TreeViewModal(DT.Rows[i], i));
+      
+            tmp.Id = Convert.ToInt32(DR["id"]);
+            if (DR["par_id"] != DBNull.Value) tmp.ParentId = Convert.ToInt32(DR["par_id"]);
+            tmp.Naim = DR["naim"].ToString();
+            if (DR["admin_coef"] != DBNull.Value) tmp.AdminCoeff = Convert.ToInt32(DR["admin_coef"]);
+            if (DR["expert_opin"] != DBNull.Value) tmp.ExpertOpinion = Convert.ToInt32(DR["expert_opin"]);
             Converters.GetConverters.ConvertDataTableToTree(DT);
         }
-        public List<User> GetUsersAndPassword()
+        public List<User> GetWorkGroupsAndPassword()
         {
             List<User> result = new List<User>();
-            tmp = ExecuteCommand("select id,fio,pwd from prep");
-            for (int i = 0; i < tmp.Count; i += 3) result.Add(new User(tmp[i + 1].ToString(), Convert.ToInt32(tmp[i]), tmp[i + 2].ToString(), false));
             tmp = ExecuteCommand("select id,pwd from work_group");
             List<object> tmp1 = new List<object>();
             string login;
@@ -87,6 +99,13 @@ namespace ARMExperta.Classes
                 login = login.Remove(login.Length - 2);
                 result.Add(new User(login, Convert.ToInt32(tmp[0]), tmp[1].ToString(), true));
             }         
+            return result;
+        }
+        public List<User> GetAdminsAndPassword()
+        {
+            List<User> result = new List<User>();
+            tmp = ExecuteCommand("select id,fio,pwd from prep");
+            for (int i = 0; i < tmp.Count; i += 3) result.Add(new User(tmp[i + 1].ToString(), Convert.ToInt32(tmp[i]), tmp[i + 2].ToString(), false));
             return result;
         }
         public List<string> GetGroups()
@@ -160,6 +179,20 @@ namespace ARMExperta.Classes
                     + GetElementID("ed_group", "naim", ed_group) + ")");
                 else ExecuteCommand("UPDATE students SET fio = '" + dr[0] + "' where id = "+dr[1]);
             }
+        }
+        public bool AddNewAdmin(string fio,string pwd)
+        {
+            if (GetElementID("prep", "fio", fio) == -1) ExecuteCommand("INSERT INTO prep ([id],[fio],[pwd]) VALUES (" + GetNewID("prep") + ",'" + fio + "','" + pwd + "')");
+            else return false;
+            return true;
+        }
+        public void UpdateAdmin(string fio, string pwd,int id)
+        {
+            ExecuteCommand("Update prep set fio = '" + fio + "',pwd = '" + pwd + "' where id = " + id);
+        }
+        public void DeleteAdmin(User us)
+        {
+            ExecuteCommand("Delete from prep where id = " + us.Id);
         }
     }
 }

@@ -47,11 +47,11 @@
                 Grid.ColumnSpan="2"
                 Margin="5" 
                 Content="Войти" 
-                Click="Button_Click"/>
+                Click="EnterInSystem"/>
         <Button Grid.Row="3" 
                 Grid.ColumnSpan="2" 
                 Margin="5" 
                 Content="Регистрация" 
-                Click="Button_Click_1"/>
+                Click="RegistrationInSystem"/>
     </Grid>
 </Window>

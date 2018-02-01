@@ -152,17 +152,14 @@
                       Name="Admininstr"
                       Visibility="Collapsed">
                 <MenuItem Header="Учебные группы"
-                          Command="classes:Commands.EducationGroup"
-                          />
+                          Command="classes:Commands.EducationGroup"/>
                 <MenuItem Header="Рабочие группы"
-                          Command="classes:Commands.WorkGroup"
-                         />
+                          Command="classes:Commands.WorkGroup"/>
                 <MenuItem Header="Администраторы"
-                          Command="classes:Commands.Admins"
-                          />
+                          Command="classes:Commands.Admins"/>
                 <MenuItem Header="Проверка"
-                          Command="classes:Commands.Check"
-                         />
+                          Command="classes:Commands.Check"/>
+                <MenuItem Header="Импорт"/>
             </MenuItem>
         </Menu>
         <TreeView x:Name="tree"
