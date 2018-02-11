@@ -37,11 +37,11 @@ namespace ARMExperta.Windows
         {
             WindowForEdit WFE = new WindowForEdit();
             WFE.ShowDialog();
-            if (WFE.GetResult != null)
+            if (WFE.Result.Trim().Length != 0)
             {
                 bool error = false;
                 foreach (string group in Server.GetServer.GetGroups())
-                    if (WFE.GetResult == group)
+                    if (WFE.Result == group)
                     {
                         error = true;
                         break;
@@ -49,12 +49,12 @@ namespace ARMExperta.Windows
                 if (error)
                 {
                     MessageBox.Show("Группа с таким названием уже есть", "АРМ Эксперта");
-                    combobox_group.SelectedValue = WFE.GetResult;
+                    combobox_group.SelectedValue = WFE.Result;
                     return;
                 }
                 else
                 {
-                    Server.GetServer.SetNewGroup(WFE.GetResult);
+                    Server.GetServer.SetNewGroup(WFE.Result);
                     UpdateComboBox();
                 }
             }

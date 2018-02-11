@@ -10,10 +10,11 @@ namespace ARMExperta.Classes
 {
     class CurrentSystemStatus : INotifyPropertyChanged
     {
+        Dictionary<int, TreeViewModal> dictionary_tree = new Dictionary<int, TreeViewModal>();
+        Dictionary<int, TreeViewModal> buffer = new Dictionary<int, TreeViewModal>();
         bool is_save = true,
              is_expert = false;
-        int current_pos;
-        string current_file_path;
+        int current_pos = -1;
         List<Dictionary<int, TreeViewModal>> history = new List<Dictionary<int, TreeViewModal>>();
         User current_user;
         TreeViewModal current_element;
@@ -32,11 +33,24 @@ namespace ARMExperta.Classes
             }
         }
 
+        public Dictionary<int,TreeViewModal> DictionaryTree
+        {
+            get
+            {
+                return dictionary_tree;
+            }
+            set
+            {
+                dictionary_tree = value;
+            }
+        }
         public ObservableCollection<TreeViewModal> Tree
         {
             get
             {
-                return tree;
+                ObservableCollection<TreeViewModal> result = new ObservableCollection<TreeViewModal>();
+                result.Add(DictionaryTree[0]);
+                return result;
             }
         }
         public bool IsSave
@@ -68,9 +82,8 @@ namespace ARMExperta.Classes
         {
             get
             {
-                foreach (TreeViewModal tvm in Tree)
-                    if (tvm.IsBuffer) return true;
-                return false;
+                if (buffer.Count != 0) return true;
+                else return false;
             }
         }
         public TreeViewModal CurrentElement
@@ -95,18 +108,6 @@ namespace ARMExperta.Classes
                 current_user = value;
             }
         }
-        public string CurrentFilePath
-        {
-            get
-            {
-                return current_file_path;
-            }
-            set
-            {
-                current_file_path = value;
-                OnPropertyChanged("Title");
-            }
-        }
         public string Title
         {
             get
@@ -116,61 +117,90 @@ namespace ARMExperta.Classes
                 title += "(" + CurrentUser.Naim + ")";
                 if (IsExpert) title += "(Эксперт)";
                 else title += "(Администратор)";
-                if (CurrentFilePath != null) title += CurrentFilePath;
+                if (CurrentUser.IsGOST)
+                    if (CurrentUser.GOST != null) title += " " + CurrentUser.GOST;
+                    else title += " Новый ГОСТ";
                 if (!IsSave) title += "*";
                 return title;
             }
         }
-
+        public bool CanUndo
+        {
+            get
+            {
+                if (current_pos != -1&&!IsExpert) return true;
+                else return false;
+            }
+        }
+        public bool CanForward
+        {
+            get
+            {
+                if (current_pos != history.Count - 1 && !IsExpert) return true;
+                else return false;
+            }
+        }
+       
         public void AddInHistory()
         {
-            ObservableCollection<TreeViewModal> tmp = new ObservableCollection<TreeViewModal>(tree);
-            history.Add(tmp);
-            current_pos = history.Count - 1;
+            history.Add(DictionaryTree);
+            current_pos++;
+        }
+        public void UndoHistory()
+        {
+            DictionaryTree = history[current_pos];
+            current_pos--;
+        }
+        public void ForwardHistory()
+        {
+            DictionaryTree = history[current_pos];
+            current_pos++;
+        }
+        public void CutFromTree(TreeViewModal tvm)
+        {
+            CopyFromTree(tvm);
+            DeleteSubTree(tvm);
+        }
+        public void CopyFromTree(TreeViewModal tvm)
+        {
+            buffer.Add(tvm.Id, DictionaryTree[tvm.Id].Clone);
+            foreach (TreeViewModal child in tvm.Children) CopyFromTree(child);
+        }
+        public void PasteFromBuffer()
+        {
+            DictionaryTree.Add(DictionaryTree.Keys.Max() + 1, buffer.First().Value.Clone);
+            DictionaryTree[DictionaryTree.Keys.Max()].ParentId = CurrentElement.Id;        
+            foreach (TreeViewModal tvm in buffer.Values)
+            {
+                if (tvm != buffer.First().Value)
+                {
+                    DictionaryTree.Add(DictionaryTree.Keys.Max() + 1, tvm.Clone);
+                    DictionaryTree[DictionaryTree.Keys.Max()].ParentId = DictionaryTree.Last(x => x.Value.Id == tvm.ParentId).Key;                  
+                }
+            }
+            foreach (int i in DictionaryTree.Keys)
+                if (DictionaryTree[i].Id != i) DictionaryTree[i].Id = i;
+        }
+        public void ClearHistory()
+        {
+            history.Clear();
+        }
+        public void ClearBuffer()
+        {
+            buffer.Clear();
+        }
+        public void DeleteSubTree(TreeViewModal tvm)
+        {
+            foreach (TreeViewModal tmp in tvm.Children) DeleteSubTree(tmp);
+            DictionaryTree.Remove(tvm.Id);
         }
         public void OnPropertyChanged(string prop)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
         }
-        public int GetNewId()
+        public void UpdateTitle()
         {
-            int result = 0;
-            foreach (TreeViewModal tvm in Tree)
-                if (tvm.Id > result) result = tvm.Id;
-            return result + 1;
-        }
-        public TreeViewModal CopySubTree(TreeViewModal root,int p_index)
-        {
-            TreeViewModal tmp = new TreeViewModal(root.Naim);
-            tmp.ParentId = p_index;
-            tmp.Id = GetNewId();
-            Tree.Add(tmp);
-            foreach (TreeViewModal tvm in root.Children) CopySubTree(tvm, tmp.Id);
-            return tmp;
-        }
-        public void SetLikeBuffer(TreeViewModal root)
-        {
-            root.IsBuffer = true;
-            foreach (TreeViewModal tvm in root.Children) SetLikeBuffer(tvm);
-        }
-        public void SetNoBuffer(TreeViewModal root)
-        {
-            root.IsBuffer = false;
-            foreach (TreeViewModal tvm in root.Children) SetLikeBuffer(tvm);
-        }
-        public void DeleteOldBuffer()
-        {
-            foreach(TreeViewModal tvm in Tree)
-                if (tvm.Parent == null&&tvm.IsBuffer)
-                {
-                    DeleteSubTree(tvm);
-                    break;
-                }
-        }
-        public void DeleteSubTree(TreeViewModal root)
-        {
-            foreach (TreeViewModal tvm in root.Children) DeleteSubTree(tvm);
-            Tree.Remove(root);
+            OnPropertyChanged("Title");
         }
     }
 }

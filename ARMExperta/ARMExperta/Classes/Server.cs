@@ -64,26 +64,14 @@ namespace ARMExperta.Classes
             else return -1;
         }
 
-        public Dictionary<int,TreeViewModal> GetModalByUser(User user)
+        public void GetModalByUser(User user)
         {
-            DA = new SqlDataAdapter("select * from models where group_id = "+user.Id.ToString()+" and is_group = '"+user.IsGroup.ToString()+"'", conn);
+            if (!user.IsGOST) DA = new SqlDataAdapter("select * from models where group_id = "+user.Id.ToString()+" and is_group = '"+user.IsGroup.ToString()+"'", conn);
+            else DA = new SqlDataAdapter("select * from GOSTs_models where gost_id = "+GetElementID("GOSTs_naim","naim",user.GOST), conn);
             CB = new SqlCommandBuilder(DA);
             DT = new DataTable();
             DA.Fill(DT);
-            Dictionary<int, TreeViewModal> result = new Dictionary<int, TreeViewModal>();
-            for (int i = 0; i < DT.Rows.Count; i++)
-            {
-                int tmp = Convert.ToInt32(DT.Rows[i]["id"]);
-                result.Keys
-            }
-            result.Add(i, new TreeViewModal(DT.Rows[i], i));
-      
-            tmp.Id = Convert.ToInt32(DR["id"]);
-            if (DR["par_id"] != DBNull.Value) tmp.ParentId = Convert.ToInt32(DR["par_id"]);
-            tmp.Naim = DR["naim"].ToString();
-            if (DR["admin_coef"] != DBNull.Value) tmp.AdminCoeff = Convert.ToInt32(DR["admin_coef"]);
-            if (DR["expert_opin"] != DBNull.Value) tmp.ExpertOpinion = Convert.ToInt32(DR["expert_opin"]);
-            Converters.GetConverters.ConvertDataTableToTree(DT);
+            foreach (DataRow dr in DT.Rows) CurrentSystemStatus.GetSS.DictionaryTree.Add(Convert.ToInt32(dr["id"]), new TreeViewModal(dr));
         }
         public List<User> GetWorkGroupsAndPassword()
         {
@@ -130,6 +118,13 @@ namespace ARMExperta.Classes
             DA.Fill(DT);
             return DT;
         }
+        public List<string> GetGOSTs()
+        {
+            List<string> result = new List<string>();
+            tmp = ExecuteCommand("select naim from GOSTs_naim");
+            foreach (string gost in tmp) result.Add(gost);
+            return result;
+        }
 
         public void SetStudentsGroup(List<string> students,string pwd)
         {
@@ -141,18 +136,34 @@ namespace ARMExperta.Classes
             foreach (string fio in students)
                 ExecuteCommand("update students set work_group = " + id + " where fio = '" + fio + "'");
         }
-        public void SaveOnServer()
+
+        public void SaveOnServer(User user)
         {
-            foreach (TreeViewModal tvm in CurrentSystemStatus.GetSS.Tree)
-                if (!tvm.IsBuffer&&tvm.Parent!=null)
-                    if (CurrentSystemStatus.GetSS.OldTree.FirstOrDefault(x=>x.Id == tvm.Id)!=null)
-                        ExecuteCommand("update models set par_id = " + tvm.Parent.Id+ ",naim = '" + tvm.Naim + "',admin_coef = " + tvm.AdminCoeff
-                            + ",expert_opin = " + tvm.ExpertOpinion + "where id = " + tvm.Id);
-                    else
-                        ExecuteCommand("INSERT INTO models(id,par_id,group_id,naim,admin_coef,expert_opin,is_group) VALUES (" + tvm.Id + ","
-                            + tvm.Parent.Id + "," + CurrentSystemStatus.GetSS.CurrentUser.Id + ",'" + tvm.Naim + "'," + tvm.AdminCoeff + ","
-                            + tvm.ExpertOpinion + ",'" + CurrentSystemStatus.GetSS.CurrentUser.IsGroup + "')");
+            if (!user.IsGOST) ExecuteCommand("delete from models where group_id = " + user.Id + " and is_group = '"+ user.IsGroup + "'");
+            else ExecuteCommand("delete from GOSTs_models where gost_id = "+GetElementID("GOSTs_naim","naim", user.GOST));
+            SaveOnServerTreeViewModal(CurrentSystemStatus.GetSS.Tree[0],0,user);
         }
+        void SaveOnServerTreeViewModal(TreeViewModal ptvm,int ppar_id,User user)
+        {
+            int par_id = 0;
+            if (ptvm.Parent != null)
+            {
+                if (!user.IsGOST)
+                {
+                    ExecuteCommand("INSERT INTO models(par_id,group_id,naim,admin_coef,expert_opin,is_group) VALUES (" + ppar_id + "," + user.Id + ",'" + ptvm.Naim 
+                        + "'," + ptvm.AdminCoeff + "," + ptvm.ExpertOpinion + ",'" + user.IsGroup + "')");
+                    par_id = Convert.ToInt32(ExecuteCommand("select top 1 id from models order by id desc")[0]);
+                }
+                else
+                {
+                    ExecuteCommand("INSERT INTO GOSTs_models (par_id,naim,gost_id) VALUES(" + ppar_id + ",'" + ptvm.Naim + "',"
+                        + GetElementID("GOSTs_naim", "naim", user.GOST)+ ")");
+                    par_id = Convert.ToInt32(ExecuteCommand("select top 1 id from GOSTs_models order by id desc")[0]);
+                }
+            }
+            foreach (TreeViewModal tvm in ptvm.Children) SaveOnServerTreeViewModal(tvm,par_id,user);
+        }
+
         public void SetNewGroup(string group)
         {
             ExecuteCommand("INSERT INTO ed_group ([id],[naim]) VALUES (" + GetNewID("ed_group") + ",'" + group + "')");
@@ -180,6 +191,7 @@ namespace ARMExperta.Classes
                 else ExecuteCommand("UPDATE students SET fio = '" + dr[0] + "' where id = "+dr[1]);
             }
         }
+
         public bool AddNewAdmin(string fio,string pwd)
         {
             if (GetElementID("prep", "fio", fio) == -1) ExecuteCommand("INSERT INTO prep ([id],[fio],[pwd]) VALUES (" + GetNewID("prep") + ",'" + fio + "','" + pwd + "')");
@@ -193,6 +205,11 @@ namespace ARMExperta.Classes
         public void DeleteAdmin(User us)
         {
             ExecuteCommand("Delete from prep where id = " + us.Id);
+        }
+
+        public void AddNewGOST(string name)
+        {
+            ExecuteCommand("INSERT INTO GOSTs_naim ([naim]) VALUES ('" + name + "')");
         }
     }
 }

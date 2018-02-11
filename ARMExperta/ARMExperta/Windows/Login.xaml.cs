@@ -40,7 +40,7 @@ namespace ARMExperta.Windows
         private void EnterInSystem(object sender, RoutedEventArgs e)
         {
             User current_user = users.FirstOrDefault(x => x.Naim == combobox_login.SelectedValue.ToString());
-            if (textbox_password.Text == current_user.Password)
+            if (passwordbox.Password == current_user.Password)
             {
                 if (!flag_podtv_admin_roots)
                 {
@@ -52,13 +52,7 @@ namespace ARMExperta.Windows
                 return_flag = true;
             }
             else MessageBox.Show("Неверный пароль");
-        }
-
-        private void TextBox_PreviewKeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Enter)
-                EnterInSystem(null, null);
-        }
+        }   
 
         private void RegistrationInSystem(object sender, RoutedEventArgs e)
         {
@@ -75,6 +69,12 @@ namespace ARMExperta.Windows
             foreach (User user in users) logins.Add(user.Naim);
             combobox_login.ItemsSource = logins;
             combobox_login.SelectedIndex = 0;
+        }
+
+        private void passwordbox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+                EnterInSystem(null, null);
         }
 
         public bool GetRightRoots()

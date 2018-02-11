@@ -22,25 +22,27 @@ namespace ARMExperta.Windows
         public Admins()
         {
             InitializeComponent();
-            UpdateDataGrid();
+            Update();
         }
 
         private void datagrid_admins_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             textbox_fio.Text = (datagrid_admins.SelectedItem as User).Naim;
-            string stars = "";
-            for (int i = 0; i < (datagrid_admins.SelectedItem as User).Password.Length; i++) stars += "*";
-            textbox_pwd.Text = stars;
+            passwordbox.Password = (datagrid_admins.SelectedItem as User).Password;
         }
 
         private void AddNewAdmin(object sender, RoutedEventArgs e)
         {
-            if (!Server.GetServer.AddNewAdmin(textbox_fio.Text, textbox_pwd.Text)) MessageBox.Show("Такой пользователь уже есть в системе", "АРМ Эксперта");
-            else
+            if (textbox_fio.Text.Trim().Length != 0 && passwordbox.Password.Trim().Length != 0)
             {
-                MessageBox.Show("Пользователь добавлен в систему", "АРМ Эксперта");
-                UpdateDataGrid();
+                if (!Server.GetServer.AddNewAdmin(textbox_fio.Text, passwordbox.Password)) MessageBox.Show("Такой пользователь уже есть в системе", "АРМ Эксперта");
+                else
+                {
+                    MessageBox.Show("Пользователь добавлен в систему", "АРМ Эксперта");
+                    Update();
+                }
             }
+            else MessageBox.Show("Введите логин и пароль", "АРМ Эксперта");
         }
 
         private void ChangeChoiceAdmin(object sender, RoutedEventArgs e)
@@ -55,9 +57,9 @@ namespace ARMExperta.Windows
             else result = true;
             if (result)
             {
-                Server.GetServer.UpdateAdmin(textbox_fio.Text,textbox_pwd.Text,(datagrid_admins.SelectedItem as User).Id);
+                Server.GetServer.UpdateAdmin(textbox_fio.Text, passwordbox.Password,(datagrid_admins.SelectedItem as User).Id);
                 MessageBox.Show("Данные о пользователе обновлены", "АРМ Эксперта");
-                UpdateDataGrid();
+                Update();
             }
         }
 
@@ -75,14 +77,16 @@ namespace ARMExperta.Windows
             {
                 Server.GetServer.DeleteAdmin(datagrid_admins.SelectedItem as User);
                 MessageBox.Show("Пользователь удалён из системы", "АРМ Эксперта");
-                UpdateDataGrid();
+                Update();
             }
         }
 
-        void UpdateDataGrid()
+        void Update()
         {
             admins = Server.GetServer.GetAdminsAndPassword();
             datagrid_admins.ItemsSource = admins;
+            textbox_fio.Text = "";
+            passwordbox.Password = "";
         }
     }
 }

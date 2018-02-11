@@ -3,18 +3,18 @@ using System.Linq;
 using Microsoft.Office.Interop.Word;
 using System.Reflection;
 using System.IO;
+using iTextSharp.text;
+using iTextSharp.text.pdf;
 
 namespace ARMExperta.Classes
 {
     class Print
     {
         static Print print;
-        Application application;
-        Document document;
-        Selection selection;
-        Table table;
-        string fileName;
-        int i;
+        PdfPTable table;
+        PdfPCell cell;
+        BaseFont baseFont; 
+        iTextSharp.text.Font font;
 
         Print() { }
 
@@ -26,43 +26,40 @@ namespace ARMExperta.Classes
                 return print;
             }
         }
-
-        void ExpandTree(TreeViewModal tree, Table table,string space)
-        {
-            table.Cell(table.Rows.Count, 1).Range.Text = space + tree.Naim;
-            table.Cell(table.Rows.Count, 2).Range.Text = tree.ExpertOpinion.ToString();
-            table.Rows.Add();
-            foreach (TreeViewModal child in tree.Children) ExpandTree(child, table,space+"    ");
-        }
-    
+  
         public void PrintDocument(TreeViewModal tree)
         {
-            application = new Application();
-            fileName = Path.GetTempFileName();
-            document = application.Documents.Open(fileName);
-            i = 1;
-            selection = application.Selection;
-            foreach (TreeViewModal child in tree.Children)
+            iTextSharp.text.Document doc = new iTextSharp.text.Document();
+            PdfWriter.GetInstance(doc, new FileStream("pdfTables.pdf", FileMode.Create));
+            doc.Open();
+            baseFont = BaseFont.CreateFont("C:/Windows/Fonts/arial.ttf", BaseFont.IDENTITY_H, BaseFont.NOT_EMBEDDED);
+            font = new iTextSharp.text.Font(baseFont, iTextSharp.text.Font.DEFAULTSIZE, iTextSharp.text.Font.NORMAL);
+            foreach (TreeViewModal tvm in tree.Children)
             {
-                document.Tables.Add(selection.Range, 1, 2);
-                table = document.Tables[i];
-                table.Borders.InsideLineStyle = WdLineStyle.wdLineStyleSingle;
-                table.Borders.OutsideLineStyle = WdLineStyle.wdLineStyleSingle;
-                ExpandTree(child, table, "");
-                table.Rows.Last.Delete();
-                i++;
-                selection.EndKey(6);
-                if (child.ExpertOpinion > 50) selection.TypeText("Критерий '"+child.Naim +"' удовлетворяет требованиям нормативных документов");
-                else selection.TypeText("Критерий '"+child.Naim + "' не удовлетворяет требованиям нормативных документов");
-                selection.TypeText("\r  ");
-            }         
-            foreach (Paragraph paragraph in document.Paragraphs)
-                if (paragraph.Range.Text.Trim() == string.Empty)
-                {
-                    paragraph.Range.Select();
-                    application.Selection.Delete();
-                }
-            application.Visible = true;
-        }        
+                table = new PdfPTable(2);
+                cell = new PdfPCell(new Phrase(tvm.Naim, font));
+                cell.Colspan = 2;
+                cell.Border = 0;
+                table.AddCell(cell);
+                foreach (TreeViewModal child in tvm.Children) RecursOutput(child, "");
+                if (tvm.ExpertOpinion > 50) cell = new PdfPCell(new Phrase("Критерий '" + tvm.Naim + "' удовлетворяет требованиям нормативных документов", font));
+                else cell = new PdfPCell(new Phrase("Критерий '" + tvm.Naim + "' не удовлетворяет требованиям нормативных документов", font));
+                cell.Colspan = 2;
+                cell.Border = 0;
+                table.SpacingBefore = 10f;
+                table.SpacingAfter = 12.5f;
+                table.AddCell(cell);
+                doc.Add(table);
+            }
+            doc.Close();
+            System.Diagnostics.Process.Start("pdfTables.pdf");
+        }
+
+        void RecursOutput(TreeViewModal tvm,string space)
+        {
+            table.AddCell(new Phrase(space+tvm.Naim, font));
+            table.AddCell(new Phrase(tvm.ExpertOpinion.ToString(), font));
+            foreach (TreeViewModal child in tvm.Children) RecursOutput(child, space + "    ");
+        }
     }
 }

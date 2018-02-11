@@ -6,8 +6,7 @@ namespace ARMExperta.Windows
 {
     public partial class WindowForEdit : Window
     {
-        string last_naim;
-
+    
         public WindowForEdit()
         {
             InitializeComponent();
@@ -17,22 +16,13 @@ namespace ARMExperta.Windows
         public WindowForEdit(string tmp)
         {
             InitializeComponent();
-            last_naim = tmp;
             textbox.Text = tmp;
             Loaded += delegate { textbox.Focus(); };
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            if (textbox.Text.Trim().Length == 0)
-            {
-                MessageBox.Show("Введите наименование поля");
-                textbox.Text = last_naim;
-            }
-            else
-            {
-                this.Close();
-            }
+            this.Close();
         }
 
         private void textbox_GotFocus(object sender, RoutedEventArgs e)
@@ -40,7 +30,7 @@ namespace ARMExperta.Windows
             textbox.SelectAll();
         }
 
-        public string GetResult
+        public string Result
         {
             get
             {

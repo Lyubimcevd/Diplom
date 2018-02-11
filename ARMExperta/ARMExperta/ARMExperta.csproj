@@ -54,6 +54,9 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="itextsharp, Version=5.5.13.0, Culture=neutral, PublicKeyToken=8354ae6d2174ddca, processorArchitecture=MSIL">
+      <HintPath>..\packages\iTextSharp.5.5.13\lib\itextsharp.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Office.Interop.Word, Version=15.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <EmbedInteropTypes>True</EmbedInteropTypes>
@@ -61,6 +64,8 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -82,6 +87,7 @@
     <Compile Include="Classes\Commands.cs" />
     <Compile Include="Classes\CurrentSystemStatus.cs" />
     <Compile Include="Classes\Print.cs" />
+    <Compile Include="Classes\SaveClass.cs" />
     <Compile Include="Classes\TreeViewModal.cs" />
     <Compile Include="Classes\User.cs" />
     <Compile Include="Windows\Admins.xaml.cs">
@@ -89,6 +95,9 @@
     </Compile>
     <Compile Include="Windows\EducationGroups.xaml.cs">
       <DependentUpon>EducationGroups.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\GOSTChoice.xaml.cs">
+      <DependentUpon>GOSTChoice.xaml</DependentUpon>
     </Compile>
     <Compile Include="Windows\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
@@ -102,11 +111,18 @@
     <Compile Include="Windows\WindowForEdit.xaml.cs">
       <DependentUpon>WindowForEdit.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Windows\WorkGroups.xaml.cs">
+      <DependentUpon>WorkGroups.xaml</DependentUpon>
+    </Compile>
     <Page Include="Windows\Admins.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Windows\EducationGroups.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Windows\GOSTChoice.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -139,6 +155,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Windows\WorkGroups.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">
@@ -158,6 +178,7 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

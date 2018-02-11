@@ -38,11 +38,11 @@
                       Name="combobox_login"/>
             <Image Grid.Column="1"/>
         </Grid>
-        <TextBox Grid.Row="1"
+        <PasswordBox Grid.Row="1"
                  Grid.Column="1" 
                  Margin="5" 
-                 PreviewKeyDown="TextBox_PreviewKeyDown"
-                 Name="textbox_password"/>
+                 Name="passwordbox" 
+                 KeyDown="passwordbox_KeyDown"/>
         <Button Grid.Row="2" 
                 Grid.ColumnSpan="2"
                 Margin="5" 

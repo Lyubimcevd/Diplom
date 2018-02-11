@@ -21,13 +21,21 @@ namespace ARMExperta.Windows
 {
     public partial class MainWindow : Window
     {
-        ObservableCollection<TreeViewModal> Root;
-
         public MainWindow()
         {
             InitializeComponent();
             DataContext = CurrentSystemStatus.GetSS;
-            if (!CurrentSystemStatus.GetSS.CurrentUser.IsGroup) Admininstr.Visibility = Visibility.Visible;
+            if (!CurrentSystemStatus.GetSS.CurrentUser.IsGroup)
+            {
+                Admininstr.Visibility = Visibility.Visible;
+                Open_gost.Visibility = Visibility.Visible;
+                Open_model.Visibility = Visibility.Visible;
+                Open_menu.Command = null;
+                Save_gost.Visibility = Visibility.Visible;
+                Save_model.Visibility = Visibility.Visible;
+                Save_menu.Command = null;
+                Save_menu.Header = "Сохранить как...";
+            }
             else Ready.Visibility = Visibility.Visible;
         }
 
@@ -35,68 +43,62 @@ namespace ARMExperta.Windows
 
         void CommandBinding_New(object sender, ExecutedRoutedEventArgs e)
         {
-            if (CheckSave()) StartWork();
+            if (CheckSave())
+            {
+                CurrentSystemStatus.GetSS.CurrentUser.IsGOST = false;
+                CurrentSystemStatus.GetSS.UpdateTitle();
+                CurrentSystemStatus.GetSS.DictionaryTree.Clear();
+                StartWork();
+            }
         }
 
         void CommandBinding_Open(object sender, ExecutedRoutedEventArgs e)
         {
             if (CheckSave())
-            {
+            {              
+                CurrentSystemStatus.GetSS.CurrentUser.IsGOST = false;
+                CurrentSystemStatus.GetSS.DictionaryTree.Clear();
                 Server.GetServer.GetModalByUser(CurrentSystemStatus.GetSS.CurrentUser);
                 StartWork();
-                foreach (TreeViewModal tvm in CurrentSystemStatus.GetSS.Tree)
-                    if (tvm.Children.Count == 0) tvm.UpdateReady();
+                foreach (TreeViewModal tvm in CurrentSystemStatus.GetSS.DictionaryTree.Values) tvm.UpdateReady();               
             }    
         }
 
         void CommandBinding_Save(object sender, ExecutedRoutedEventArgs e)
-        {
-            Server.GetServer.SaveOnServer();
-            MessageBox.Show("Сохранено","АРМ Эксперта");
-            CurrentSystemStatus.GetSS.IsSave = true;
+        {                   
+            Server.GetServer.SaveOnServer(CurrentSystemStatus.GetSS.CurrentUser);
+            System.Windows.MessageBox.Show("Сохранено", "АРМ Эксперта");
+            CurrentSystemStatus.GetSS.IsSave = true;   
         }
 
         void CommandBinding_Undo(object sender, ExecutedRoutedEventArgs e)
         {
-            CurrentSystemStatus.GetSS.CurrentPosInHistory--;
-            CurrentSystemStatus.GetSS.Tree = CurrentSystemStatus.GetSS.History[CurrentSystemStatus.GetSS.CurrentPosInHistory];
-            Root[0].Update();
+            CurrentSystemStatus.GetSS.UndoHistory();
             CurrentSystemStatus.GetSS.IsSave = false;
         }
 
         void CommandBinding_Forward(object sender, ExecutedRoutedEventArgs e)
         {
-            CurrentSystemStatus.GetSS.CurrentPosInHistory++;
-            CurrentSystemStatus.GetSS.Tree = CurrentSystemStatus.GetSS.History[CurrentSystemStatus.GetSS.CurrentPosInHistory];
-            Root[0].Update();
+            CurrentSystemStatus.GetSS.ForwardHistory();
             CurrentSystemStatus.GetSS.IsSave = false;
         }
 
         void CommandBinding_Cut(object sender, ExecutedRoutedEventArgs e)
         {
-            CurrentSystemStatus.GetSS.DeleteOldBuffer();
-            CurrentSystemStatus.GetSS.CurrentElement.ParentId = -1;
-            CurrentSystemStatus.GetSS.SetLikeBuffer(CurrentSystemStatus.GetSS.CurrentElement);
+            CurrentSystemStatus.GetSS.ClearBuffer();
+            CurrentSystemStatus.GetSS.CutFromTree(CurrentSystemStatus.GetSS.CurrentElement);
             Update();
         }
 
         void CommandBinding_Copy(object sender, ExecutedRoutedEventArgs e)
         {
-            CurrentSystemStatus.GetSS.DeleteOldBuffer();
-            CurrentSystemStatus.GetSS.SetLikeBuffer(CurrentSystemStatus.GetSS.CopySubTree(CurrentSystemStatus.GetSS.CurrentElement, -1));
+            CurrentSystemStatus.GetSS.ClearBuffer();
+            CurrentSystemStatus.GetSS.CopyFromTree(CurrentSystemStatus.GetSS.CurrentElement);
         }
 
         void CommandBinding_Paste(object sender, ExecutedRoutedEventArgs e)
         {
-            TreeViewModal tmp = null;
-            foreach (TreeViewModal tvm in CurrentSystemStatus.GetSS.Tree)
-                if (tvm.Parent == null && tvm.IsBuffer)
-                {
-                    tvm.ParentId = CurrentSystemStatus.GetSS.CurrentElement.Id;
-                    CurrentSystemStatus.GetSS.SetNoBuffer(tvm);
-                    tmp = tvm;
-                }
-            CurrentSystemStatus.GetSS.SetLikeBuffer(CurrentSystemStatus.GetSS.CopySubTree(tmp, -1));
+            CurrentSystemStatus.GetSS.PasteFromBuffer();
             Update();
         }
 
@@ -104,7 +106,7 @@ namespace ARMExperta.Windows
         {
             WindowForEdit WFE = new WindowForEdit(CurrentSystemStatus.GetSS.CurrentElement.Naim);
             WFE.ShowDialog();
-            CurrentSystemStatus.GetSS.CurrentElement.Naim = WFE.GetResult;
+            if (WFE.Result.Trim().Length != 0) CurrentSystemStatus.GetSS.CurrentElement.Naim = WFE.Result;
             Update();
         }
 
@@ -138,15 +140,15 @@ namespace ARMExperta.Windows
 
         void CommandBinding_AddElement(object sender, ExecutedRoutedEventArgs e)
         {
-            TreeViewModal tmp = new TreeViewModal();
             WindowForEdit WFE = new WindowForEdit();
-            WFE.ShowDialog();
-            tmp.Naim = WFE.GetResult;
-            if (tmp.Naim != null)
+            WFE.ShowDialog();            
+            if (WFE.Result.Trim().Length != 0)
             {
-                tmp.Id = CurrentSystemStatus.GetSS.GetNewId();
+                TreeViewModal tmp = new TreeViewModal();
+                tmp.Naim = WFE.Result;
+                tmp.Id = CurrentSystemStatus.GetSS.DictionaryTree.Keys.Max() + 1;
                 tmp.ParentId = CurrentSystemStatus.GetSS.CurrentElement.Id;
-                CurrentSystemStatus.GetSS.Tree.Add(tmp);
+                CurrentSystemStatus.GetSS.DictionaryTree.Add(tmp.Id, tmp);
                 Update();
             }
         }
@@ -154,12 +156,14 @@ namespace ARMExperta.Windows
         void CommandBinding_ChangeWorkMode(object sender, ExecutedRoutedEventArgs e)
         {
             if (CheckSave())
-            CurrentSystemStatus.GetSS.IsExpert = !CurrentSystemStatus.GetSS.IsExpert;
+                CurrentSystemStatus.GetSS.IsExpert = !CurrentSystemStatus.GetSS.IsExpert;
+            foreach (TreeViewModal tvm in CurrentSystemStatus.GetSS.DictionaryTree.Values) tvm.UpdateReady();
+                
         }
 
         void CommandBinding_Print(object sender, ExecutedRoutedEventArgs e)
         {
-            Print.GetPrint.PrintDocument(Root[0]);
+            Print.GetPrint.PrintDocument(CurrentSystemStatus.GetSS.Tree[0]);
         }
 
         void CommandBinding_Ready(object sender, ExecutedRoutedEventArgs e)
@@ -196,6 +200,7 @@ namespace ARMExperta.Windows
         private void Save_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
             e.CanExecute = !CurrentSystemStatus.GetSS.IsSave;
+            Save_gost.IsEnabled = e.CanExecute;
         }
 
         private void Cut_CanExecute(object sender, CanExecuteRoutedEventArgs e)
@@ -217,8 +222,7 @@ namespace ARMExperta.Windows
         private void Paste_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
             if (CurrentSystemStatus.GetSS.CurrentElement != null
-                &&CurrentSystemStatus.GetSS.IsBuffer
-                &&!CurrentSystemStatus.GetSS.IsExpert) e.CanExecute = true;
+                &&CurrentSystemStatus.GetSS.IsBuffer&&!CurrentSystemStatus.GetSS.IsExpert) e.CanExecute = true;
             else e.CanExecute = false;
         }
 
@@ -231,22 +235,32 @@ namespace ARMExperta.Windows
         }
 
         private void Estimate_CanExecute(object sender, CanExecuteRoutedEventArgs e)
-        {
-            if (CurrentSystemStatus.GetSS.CurrentElement != null
-                &&CurrentSystemStatus.GetSS.CurrentElement.Children.Count == 0) e.CanExecute = true;
+        { 
+            if (CurrentSystemStatus.GetSS.CurrentElement != null&&!CurrentSystemStatus.GetSS.CurrentUser.IsGOST)
+            {
+                if (!CurrentSystemStatus.GetSS.IsExpert)
+                {
+                    if (CurrentSystemStatus.GetSS.CurrentElement.Parent != null) e.CanExecute = true;
+                    else e.CanExecute = false;
+                }
+                else
+                {
+                    if (CurrentSystemStatus.GetSS.CurrentElement.Children.Count == 0) e.CanExecute = true;
+                    else e.CanExecute = false;
+                }
+            }
             else e.CanExecute = false;
         }
 
         private void Undo_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
-            if (CurrentSystemStatus.GetSS.CurrentPosInHistory > 0
-                &&!CurrentSystemStatus.GetSS.IsExpert) e.CanExecute = true;
+            if (CurrentSystemStatus.GetSS.CanUndo) e.CanExecute = true;
             else e.CanExecute = false;
         }
 
         private void Forward_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
-            if ((CurrentSystemStatus.GetSS.CurrentPosInHistory < CurrentSystemStatus.GetSS.History.Count - 1)&&!CurrentSystemStatus.GetSS.IsExpert) e.CanExecute = true;
+            if (CurrentSystemStatus.GetSS.CanForward) e.CanExecute = true;
             else e.CanExecute = false;
         }
 
@@ -286,16 +300,13 @@ namespace ARMExperta.Windows
         private void TextBlock_PreviewMouseButtonDown(object sender, MouseButtonEventArgs e)
         {
             CurrentSystemStatus.GetSS.CurrentElement = (sender as TextBlock).DataContext as TreeViewModal;
-            if (e.ChangedButton == MouseButton.Left
-                &&CurrentSystemStatus.GetSS.CurrentElement.Children.Count == 0)
-                if (e.ClickCount == 2) CommandBinding_Estimate(null, null);
         }      
 
         bool CheckSave()
         {
             if (!CurrentSystemStatus.GetSS.IsSave)
             {
-                MessageBoxResult result = MessageBox.Show("Сохранить изменения?", "АРМ Эксперта", MessageBoxButton.YesNoCancel);
+                MessageBoxResult result = System.Windows.MessageBox.Show("Сохранить изменения?", "АРМ Эксперта", MessageBoxButton.YesNoCancel);
                 if (result == MessageBoxResult.Yes) CommandBinding_Save(null, null);
                 if (result == MessageBoxResult.Cancel) return false;
                 else
@@ -309,19 +320,16 @@ namespace ARMExperta.Windows
 
         void StartWork()
         {
-            CurrentSystemStatus.GetSS.History.Clear();
-            CurrentSystemStatus.GetSS.Tree = new ObservableCollection<TreeViewModal>(CurrentSystemStatus.GetSS.OldTree);
-            CurrentSystemStatus.GetSS.Tree.Insert(0,new TreeViewModal("Показатели качества"));
-            Root = new ObservableCollection<TreeViewModal>();
-            Root.Add(CurrentSystemStatus.GetSS.Tree.First());
-            tree.ItemsSource = Root;
-            CurrentSystemStatus.GetSS.AddInHistory();
+            CurrentSystemStatus.GetSS.ClearHistory();         
+            CurrentSystemStatus.GetSS.DictionaryTree.Add(0,new TreeViewModal("Показатели качества"));
+            tree.ItemsSource = CurrentSystemStatus.GetSS.Tree;
+            CurrentSystemStatus.GetSS.AddInHistory();            
         }
 
         void Update()
         {
-            Root[0].Update();
             CurrentSystemStatus.GetSS.AddInHistory();
+            tree.ItemsSource = CurrentSystemStatus.GetSS.Tree;
             CurrentSystemStatus.GetSS.IsSave = false;
         }
 
@@ -338,22 +346,64 @@ namespace ARMExperta.Windows
 
             if (OFD.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
-                save_path = OFD.FileName;
                 DataContractJsonSerializer BF = new DataContractJsonSerializer(typeof(SaveClass));
-                using (FileStream fs = new FileStream(save_path, FileMode.Open))
-                {
-                    Root = new ObservableCollection<TreeViewModal>();
-                    Root.Add(new TreeViewModal(BF.ReadObject(fs) as SaveClass, null));
-                }
-                tree.ItemsSource = Root;
-                windows_title.Title = "АРМ Эксперта Редактор: " + OFD.FileName;
-
-                is_open = true;
-                is_save = true;
-                history = new List<TreeViewModal>();
-                Historian();
-                is_history_begin = true;
-                is_history_end = true;
+                using (FileStream fs = new FileStream(OFD.FileName, FileMode.Open)) ReadSaveClass(BF.ReadObject(fs) as SaveClass,0);
+                CurrentSystemStatus.GetSS.DictionaryTree.Add(0, new TreeViewModal("Показатели качества"));
+                Update();
             }
+        }
+
+        void ReadSaveClass(SaveClass sc,int par_id)
+        {
+            TreeViewModal tmp = new TreeViewModal(sc.Naim);
+            if (CurrentSystemStatus.GetSS.DictionaryTree.Count != 0) tmp.Id = CurrentSystemStatus.GetSS.DictionaryTree.Keys.Max() + 1;
+            else tmp.Id = 1;
+            tmp.ParentId = par_id;
+            CurrentSystemStatus.GetSS.DictionaryTree.Add(tmp.Id, tmp);
+            foreach (SaveClass sc_tmp in sc.Children) ReadSaveClass(sc_tmp, tmp.Id);
+        }
+
+        private void Open_gost_Click(object sender, RoutedEventArgs e)
+        {
+            if (CheckSave())
+            {
+                GOSTChoice GCh = new GOSTChoice();
+                GCh.ShowDialog();
+                if (GCh.Result != null)
+                {
+                    CurrentSystemStatus.GetSS.CurrentUser.IsGOST = true;
+                    CurrentSystemStatus.GetSS.CurrentUser.GOST = GCh.Result;
+                    CurrentSystemStatus.GetSS.UpdateTitle();
+                    CurrentSystemStatus.GetSS.DictionaryTree.Clear();
+                    Server.GetServer.GetModalByUser(CurrentSystemStatus.GetSS.CurrentUser);
+                    StartWork();
+                }
+            }
+        }
+
+        private void Save_gost_Click(object sender, RoutedEventArgs e)
+        {
+            if (CurrentSystemStatus.GetSS.CurrentUser.GOST == null)
+            {
+                System.Windows.MessageBox.Show("Введите название ГОСТа", "АРМ Эксперта");
+                WindowForEdit WFE = new WindowForEdit();
+                WFE.ShowDialog();
+                if (WFE.Result.Trim().Length != 0)
+                {
+                    CurrentSystemStatus.GetSS.CurrentUser.GOST = WFE.Result;
+                    Server.GetServer.AddNewGOST(CurrentSystemStatus.GetSS.CurrentUser.GOST);
+                    Server.GetServer.SaveOnServer(CurrentSystemStatus.GetSS.CurrentUser);
+                    System.Windows.MessageBox.Show("Сохранено", "АРМ Эксперта");
+                    CurrentSystemStatus.GetSS.CurrentUser.IsGOST = true;
+                    CurrentSystemStatus.GetSS.IsSave = true;
+                }
+            }
+            else
+            {
+                Server.GetServer.SaveOnServer(CurrentSystemStatus.GetSS.CurrentUser);
+                System.Windows.MessageBox.Show("Сохранено", "АРМ Эксперта");
+                CurrentSystemStatus.GetSS.IsSave = true;
+            }
+        }
     }
 }

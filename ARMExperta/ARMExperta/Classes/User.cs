@@ -8,11 +8,12 @@ namespace ARMExperta.Classes
 {
     class User
     {
-        string naim;
+        string naim,
+            password,
+            gost_naim;
         int id;
-        bool is_group;
-        string password;
-
+        bool is_group,
+            is_gost;
         public User(string p_naim,int p_id,string p_password,bool p_is_group)
         {
             naim = p_naim;
@@ -48,6 +49,27 @@ namespace ARMExperta.Classes
                 return password;
             }
         }
-
+        public bool IsGOST
+        {
+            get
+            {
+                return is_gost;
+            }
+            set
+            {
+                is_gost = value;
+            }
+        }
+        public string GOST
+        {
+            get
+            {
+                return gost_naim;
+            }
+            set
+            {
+                gost_naim = value;
+            }
+        }
     }
 }

@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ARMExperta.Windows"
         mc:Ignorable="d"
-        Title="Admins" Height="300" Width="350">
+        Title="Администраторы" Height="300" Width="350">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
@@ -42,9 +42,9 @@
                      Name="textbox_fio"/>
             <TextBlock Grid.Row="1" 
                        Text="Пароль: "/>
-            <TextBox Grid.Column="1" 
+            <PasswordBox Grid.Column="1" 
                      Grid.Row="1" 
-                     Name="textbox_pwd"/>
+                     Name="passwordbox"/>
         </Grid>
         <Button Grid.Column="1" 
                 Grid.Row="1"

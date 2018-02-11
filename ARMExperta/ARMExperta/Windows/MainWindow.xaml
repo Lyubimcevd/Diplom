@@ -77,6 +77,8 @@
         <ContextMenu x:Key="Context_menu_mvm">
             <MenuItem Header="Новый лист" 
                       Command="classes:Commands.AddElement"/>
+            <MenuItem Header="Оценить" 
+                      Command="classes:Commands.Estimate"/>
             <Separator/>
             <MenuItem Header="Вырезать" 
                       Command="Cut"/>
@@ -86,8 +88,6 @@
                       Command="Paste"/>
             <MenuItem Header="Переименовать" 
                       Command="classes:Commands.Rename"/>
-            <MenuItem Header="Оценить" 
-                      Command="classes:Commands.Estimate"/>
         </ContextMenu>
     </Window.Resources>
     <Grid>
@@ -100,10 +100,30 @@
                 <MenuItem Header="Новая модель оценки" 
                           Command="New"/>
                 <MenuItem Header="Открыть модель оценки" 
-                          Command="Open"/>
+                          Command="Open"
+                          Name="Open_menu">
+                    <MenuItem Header="ГОСТ" 
+                              Name="Open_gost" 
+                              Visibility="Collapsed" 
+                              Click="Open_gost_Click"/>
+                    <MenuItem Header="Модель"
+                              Name="Open_model" 
+                              Visibility="Collapsed" 
+                              Command="Open"/>
+                </MenuItem>                         
                 <Separator/>
                 <MenuItem Header="Сохранить" 
-                          Command="Save"/>
+                          Command="Save"
+                          Name="Save_menu">
+                    <MenuItem Header="ГОСТ" 
+                              Name="Save_gost" 
+                              Visibility="Collapsed" Click="Save_gost_Click" 
+                              />
+                    <MenuItem Header="Модель"
+                              Name="Save_model" 
+                              Visibility="Collapsed" 
+                              Command="Save"/>
+                </MenuItem>
                 <Separator/>
                 <MenuItem Header="Режим работы"
                           Command="classes:Commands.ChangeWorkMode"/>
@@ -159,7 +179,7 @@
                           Command="classes:Commands.Admins"/>
                 <MenuItem Header="Проверка"
                           Command="classes:Commands.Check"/>
-                <MenuItem Header="Импорт"/>
+                <MenuItem Header="Импорт" Click="MenuItem_Click"/>
             </MenuItem>
         </Menu>
         <TreeView x:Name="tree"

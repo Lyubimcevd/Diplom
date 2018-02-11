@@ -19,7 +19,7 @@ namespace ARMExperta.Classes
         public SaveClass(TreeViewModal psave)
         {
             naim = psave.Naim;
-            foreach (TreeViewModal mod in psave.Children) children.Add(mod.Save);
+            //foreach (TreeViewModal mod in psave.Children) children.Add(mod.Save);
         }
         public string Naim
         {
