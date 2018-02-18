@@ -19,45 +19,41 @@ namespace ARMExperta.Windows
     public partial class Admins : Window
     {
         List<User> admins;
+
         public Admins()
         {
             InitializeComponent();
             Update();
-        }
-
-        private void datagrid_admins_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            textbox_fio.Text = (datagrid_admins.SelectedItem as User).Naim;
-            passwordbox.Password = (datagrid_admins.SelectedItem as User).Password;
-        }
+        }   
 
         private void AddNewAdmin(object sender, RoutedEventArgs e)
         {
-            if (textbox_fio.Text.Trim().Length != 0 && passwordbox.Password.Trim().Length != 0)
+            if (CurrentSystemStatus.GetSS.StringIsCorrect(textbox_fio.Text) && CurrentSystemStatus.GetSS.StringIsCorrect(passwordbox.Password))
             {
-                if (!Server.GetServer.AddNewAdmin(textbox_fio.Text, passwordbox.Password)) MessageBox.Show("Такой пользователь уже есть в системе", "АРМ Эксперта");
-                else
+                if (Server.GetServer.GetAdmins().FirstOrDefault(x => x.Naim == textbox_fio.Text.Trim()) == null)
                 {
+                    Server.GetServer.AddNewAdmin(textbox_fio.Text, passwordbox.Password);
                     MessageBox.Show("Пользователь добавлен в систему", "АРМ Эксперта");
                     Update();
                 }
+                else MessageBox.Show("Такой пользователь уже есть в системе", "АРМ Эксперта");             
             }
             else MessageBox.Show("Введите логин и пароль", "АРМ Эксперта");
         }
 
         private void ChangeChoiceAdmin(object sender, RoutedEventArgs e)
         {
-            bool result = false;
-            if (datagrid_admins.SelectedItem as User != CurrentSystemStatus.GetSS.CurrentUser)
+            User current_user = null;
+            if (admins.First(x => x.Naim == listbox.SelectedItem.ToString()) != CurrentSystemStatus.GetSS.CurrentUser)
             {
-                Login Log = new Login(true);
-                Log.ShowDialog();
-                if (Log.GetRightRoots()) result = true;
+                Login LG = new Login();
+                LG.ShowDialog();
+                if (LG.EnterUser?.Id != -1) current_user = LG.EnterUser;
             }
-            else result = true;
-            if (result)
+            else current_user = CurrentSystemStatus.GetSS.CurrentUser;
+            if (current_user != null)
             {
-                Server.GetServer.UpdateAdmin(textbox_fio.Text, passwordbox.Password,(datagrid_admins.SelectedItem as User).Id);
+                Server.GetServer.UpdateAdmin(listbox.SelectedItem.ToString(), passwordbox.Password, admins.First(x => x.Naim == listbox.SelectedItem.ToString()).Id);
                 MessageBox.Show("Данные о пользователе обновлены", "АРМ Эксперта");
                 Update();
             }
@@ -65,17 +61,17 @@ namespace ARMExperta.Windows
 
         private void DeleteChoiceAdmin(object sender, RoutedEventArgs e)
         {
-            bool result = false;
-            if (datagrid_admins.SelectedItem as User != CurrentSystemStatus.GetSS.CurrentUser)
+            User current_user = null;
+            if (admins.First(x => x.Naim == listbox.SelectedItem.ToString()) != CurrentSystemStatus.GetSS.CurrentUser)
             {
-                Login Log = new Login(true);
-                Log.ShowDialog();
-                if (Log.GetRightRoots()) result = true;
+                Login LG = new Login();
+                LG.ShowDialog();
+                if (LG.EnterUser?.Id != -1) current_user = LG.EnterUser;
             }
-            else result = true;
-            if (result)
+            else current_user = CurrentSystemStatus.GetSS.CurrentUser;
+            if (current_user != null)
             {
-                Server.GetServer.DeleteAdmin(datagrid_admins.SelectedItem as User);
+                Server.GetServer.DeleteAdmin(current_user.Id);
                 MessageBox.Show("Пользователь удалён из системы", "АРМ Эксперта");
                 Update();
             }
@@ -83,10 +79,22 @@ namespace ARMExperta.Windows
 
         void Update()
         {
-            admins = Server.GetServer.GetAdminsAndPassword();
-            datagrid_admins.ItemsSource = admins;
+            admins = Server.GetServer.GetAdmins();
+            List<string> tmp = new List<string>();
+            foreach (User us in admins) tmp.Add(us.Naim);
+            listbox.ItemsSource = tmp;
             textbox_fio.Text = "";
             passwordbox.Password = "";
+            change.IsEnabled = false;
+            delete.IsEnabled = false;
+        }
+
+        private void listbox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            textbox_fio.Text = listbox.SelectedItem.ToString();
+            passwordbox.Password = admins.First(x => x.Naim == textbox_fio.Text).Password;
+            change.IsEnabled = true;
+            delete.IsEnabled = true;
         }
     }
 }

@@ -1,11 +1,11 @@
-﻿<Window x:Class="ARMExperta.Windows.GOSTChoice"
+﻿<Window x:Class="ARMExperta.Windows.Choice"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ARMExperta.Windows"
         mc:Ignorable="d"
-        Title="Открыть ГОСТ" Height="300" Width="300">
+        Title="Выбор" Height="300" Width="300">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition/>
@@ -14,7 +14,7 @@
         <ListBox Name="listbox" 
                  MouseDoubleClick="listbox_MouseDoubleClick"/>
         <Button Grid.Row="1" 
-                Content="Открыть" 
+                Content="Выбрать" 
                 Click="Button_Click"/>
     </Grid>
 </Window>

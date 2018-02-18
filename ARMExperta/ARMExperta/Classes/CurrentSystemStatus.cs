@@ -5,6 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Collections.ObjectModel;
+using System.Data;
+using ARMExperta.Windows;
 
 namespace ARMExperta.Classes
 {
@@ -18,6 +20,7 @@ namespace ARMExperta.Classes
         List<Dictionary<int, TreeViewModal>> history = new List<Dictionary<int, TreeViewModal>>();
         User current_user;
         TreeViewModal current_element;
+        Chat ch = new Chat();
 
         static CurrentSystemStatus current_sys_stat;
         public event PropertyChangedEventHandler PropertyChanged;
@@ -117,9 +120,7 @@ namespace ARMExperta.Classes
                 title += "(" + CurrentUser.Naim + ")";
                 if (IsExpert) title += "(Эксперт)";
                 else title += "(Администратор)";
-                if (CurrentUser.IsGOST)
-                    if (CurrentUser.GOST != null) title += " " + CurrentUser.GOST;
-                    else title += " Новый ГОСТ";
+                if (CurrentUser.GOST != 0) title += " " + Server.GetServer.GetGOSTs()[CurrentUser.GOST];
                 if (!IsSave) title += "*";
                 return title;
             }
@@ -201,6 +202,30 @@ namespace ARMExperta.Classes
         public void UpdateTitle()
         {
             OnPropertyChanged("Title");
+        }
+        public bool StringIsCorrect(string str)
+        {
+            if (str.Trim().Length != 0) return true;
+            else return false;
+        }
+        public DataTable ConvertDictionaryToDataTable(Dictionary<int, string> dict)
+        {
+            DataTable result = new DataTable();
+            result.Columns.Add("ФИО");
+            foreach (string naim in dict.Values)
+            {
+                DataRow tmp = result.NewRow();
+                tmp["ФИО"] = naim;
+                result.Rows.Add(tmp);
+            }
+            return result;
+        }
+        public Chat ChatWindow
+        {
+            get
+            {
+                return ch;
+            }
         }
     }
 }

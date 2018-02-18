@@ -22,7 +22,7 @@ namespace ARMExperta.Classes
 
         public TreeViewModal(DataRow dr)
         {
-            if (!CurrentSystemStatus.GetSS.CurrentUser.IsGOST)
+            if (CurrentSystemStatus.GetSS.CurrentUser.GOST == 0)
             {
                 id = Convert.ToInt32(dr["id"]);
                 if (dr["par_id"] != DBNull.Value) par_id = Convert.ToInt32(dr["par_id"]);

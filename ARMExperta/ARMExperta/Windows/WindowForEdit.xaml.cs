@@ -34,7 +34,7 @@ namespace ARMExperta.Windows
         {
             get
             {
-                return textbox.Text;
+                return textbox.Text.Trim();
             }
         }
 

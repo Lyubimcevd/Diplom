@@ -16,19 +16,21 @@ using ARMExperta.Classes;
 namespace ARMExperta.Windows
 {
    
-    public partial class GOSTChoice : Window
+    public partial class Choice : Window
     {
-        string choice_gost;
+        int id;
+        Dictionary<int, string> dict;
 
-        public GOSTChoice()
+        public Choice(Dictionary<int,string> p_dict)
         {
             InitializeComponent();
-            listbox.ItemsSource = Server.GetServer.GetGOSTs();
+            dict = p_dict;
+            listbox.ItemsSource = dict.Values;
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            choice_gost = listbox.SelectedItem.ToString();
+            id = dict.First(x=>x.Value == listbox.SelectedItem.ToString()).Key;
             this.Close();
         }
 
@@ -38,11 +40,11 @@ namespace ARMExperta.Windows
                 if (listbox.SelectedItem!= null) Button_Click(null, null);
         }
 
-        public string Result
+        public int Result
         {
             get
             {
-                return choice_gost;
+                return id;
             }
         }
     }

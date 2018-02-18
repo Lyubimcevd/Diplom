@@ -18,11 +18,9 @@ namespace ARMExperta.Windows
 {
     public partial class Login : Window
     {
-        MainWindow MW;
         List<User> users;
-        List<string> logins;
-        bool flag_podtv_admin_roots = false,
-             return_flag = false;
+        User current_user;
+        bool is_attempt_enter;
 
         public Login()
         {
@@ -30,28 +28,12 @@ namespace ARMExperta.Windows
             UpdateComboBox();          
         }
 
-        public Login(bool flag)
-        {
-            InitializeComponent();
-            UpdateComboBox();
-            flag_podtv_admin_roots = true;
-        }
-
         private void EnterInSystem(object sender, RoutedEventArgs e)
         {
-            User current_user = users.FirstOrDefault(x => x.Naim == combobox_login.SelectedValue.ToString());
-            if (passwordbox.Password == current_user.Password)
-            {
-                if (!flag_podtv_admin_roots)
-                {
-                    CurrentSystemStatus.GetSS.CurrentUser = current_user;
-                    MW = new MainWindow();
-                    MW.Show();
-                }
-                this.Close();
-                return_flag = true;
-            }
-            else MessageBox.Show("Неверный пароль");
+            User tmp = users.First(x => x == combobox.SelectedItem);
+            if (passwordbox.Password == tmp.Password) current_user = tmp;
+            is_attempt_enter = true;
+            this.Close();
         }   
 
         private void RegistrationInSystem(object sender, RoutedEventArgs e)
@@ -63,12 +45,10 @@ namespace ARMExperta.Windows
 
         void UpdateComboBox()
         {
-            users = Server.GetServer.GetWorkGroupsAndPassword();
-            users.AddRange(Server.GetServer.GetAdminsAndPassword());
-            logins = new List<string>();
-            foreach (User user in users) logins.Add(user.Naim);
-            combobox_login.ItemsSource = logins;
-            combobox_login.SelectedIndex = 0;
+            users = Server.GetServer.GetWorkGroups();
+            users.AddRange(Server.GetServer.GetAdmins());           
+            combobox.ItemsSource = users;
+            combobox.SelectedIndex = 0;
         }
 
         private void passwordbox_KeyDown(object sender, KeyEventArgs e)
@@ -77,9 +57,17 @@ namespace ARMExperta.Windows
                 EnterInSystem(null, null);
         }
 
-        public bool GetRightRoots()
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            return return_flag;
-        }       
+            if (!is_attempt_enter) current_user = new User(-1, false);
+        }
+
+        public User EnterUser
+        {
+            get
+            {
+                return current_user;
+            }
+        }
     }
 }

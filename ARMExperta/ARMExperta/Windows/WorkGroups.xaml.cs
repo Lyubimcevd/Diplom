@@ -11,17 +11,103 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using ARMExperta.Classes;
 
 namespace ARMExperta.Windows
 {
-    /// <summary>
-    /// Логика взаимодействия для WorkGroups.xaml
-    /// </summary>
     public partial class WorkGroups : Window
     {
-        public WorkGroups()
+        List<User> groups;
+        Dictionary<int, string> students;
+        MainWindow main_window;
+
+        public WorkGroups(MainWindow p_main_window)
         {
             InitializeComponent();
+            main_window = p_main_window;
+            UpdateComboBox();
+        }
+
+        private void Give_Gost(object sender, RoutedEventArgs e)
+        {
+            Choice Ch = new Choice(Server.GetServer.GetGOSTs());
+            Ch.ShowDialog();
+            if (Ch.Result != 0)
+            {
+                Server.GetServer.CopyGOSTToAllWorkGroups(Ch.Result);
+                MessageBox.Show("Готово", "АРМ Эксперта");
+            }
+        }
+
+        private void combobox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (combobox.SelectedItem != null)
+            {
+                students = Server.GetServer.GetStudentsFromWorkGroup(groups.First(x => x == combobox.SelectedItem).Id);
+                listbox.ItemsSource = students.Values.ToList();
+                passwordbox.Password = groups.First(x => x == combobox.SelectedItem).Password;
+                mark.Text = groups.First(x => x == combobox.SelectedItem).Mark;
+            }
+        }
+
+        private void Add_Student(object sender, RoutedEventArgs e)
+        {
+            Dictionary<int, string> tmp = Server.GetServer.GetStudentsFromEducationGroup(groups.First(x => x == combobox.SelectedItem).IdEucationGroup);
+            Choice Ch = new Choice(tmp);
+            Ch.ShowDialog();
+            if (Ch.Result != 0)
+            {
+                students.Add(Ch.Result, tmp[Ch.Result]);
+                listbox.ItemsSource = students.Values.ToList();
+            }
+        }
+
+        private void Delete_Student(object sender, RoutedEventArgs e)
+        {
+            if (listbox.SelectedItem != null)
+            {
+                if (students.Count != 1)
+                {
+                    students.Remove(students.First(x => x.Value == listbox.SelectedItem.ToString()).Key);
+                    listbox.ItemsSource = students.Values.ToList();
+                }
+                else
+                if (MessageBox.Show("Рабочая группа будет удалена. Продолжить?", "АРМ Эксперта", MessageBoxButton.YesNo)
+                == MessageBoxResult.Yes) Delete_Group(null, null);
+            }
+            else MessageBox.Show("Студент не выбран", "АРМ Эксперта");
+        }
+
+        void UpdateComboBox()
+        {
+            groups = Server.GetServer.GetWorkGroups();
+            combobox.ItemsSource = groups;
+            combobox.SelectedIndex = 0;
+        }
+
+        private void Delete_Group(object sender, RoutedEventArgs e)
+        {
+            if (MessageBox.Show("Вы уверены? Будет удалена модель рабочей группы", "АРМ Эксперта", MessageBoxButton.YesNo)
+                == MessageBoxResult.Yes)
+            {
+                Server.GetServer.DeleteWorkGroup(groups.First(x => x == combobox.SelectedItem).Id);
+                MessageBox.Show("Группа удалена", "АРМ Эксперта");
+                UpdateComboBox();
+            }
+        }
+
+        private void model_Click(object sender, RoutedEventArgs e)
+        {
+            main_window.OpenUserModel(groups.First(x => x == combobox.SelectedItem));
+            main_window.Activate();
+        }
+
+        private void save_Click(object sender, RoutedEventArgs e)
+        {
+            Server.GetServer.UpdateWorkGroup(students, groups.First(x => x == combobox.SelectedItem).Id);
+            Server.GetServer.UpdatePasswordForWorkGroup(passwordbox.Password, groups.First(x => x == combobox.SelectedItem).Id);
+            if (mark.SelectedItem != null) Server.GetServer.UpdateMarkForWorkGroup(mark.Text, groups.First(x => x == combobox.SelectedItem).Id);
+            MessageBox.Show("Сохранено", "АРМ Эксперта");
         }
     }
 }

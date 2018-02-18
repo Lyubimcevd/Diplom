@@ -60,8 +60,6 @@
                         Executed="CommandBinding_WorkGroup"/>
         <CommandBinding Command="classes:Commands.Admins" 
                         Executed="CommandBinding_Admins"/>
-        <CommandBinding Command="classes:Commands.Check" 
-                        Executed="CommandBinding_Check"/>
         <CommandBinding Command="classes:Commands.Ready" 
                         Executed="CommandBinding_Ready"/>
         <CommandBinding Command="Print" 
@@ -101,27 +99,29 @@
                           Command="New"/>
                 <MenuItem Header="Открыть модель оценки" 
                           Command="Open"
-                          Name="Open_menu">
+                          Name="Open_menu_work_group"/>
+                <MenuItem Header="Открыть модель оценки" 
+                          Name="Open_menu_admin"
+                          Visibility="Collapsed">
                     <MenuItem Header="ГОСТ" 
                               Name="Open_gost" 
-                              Visibility="Collapsed" 
                               Click="Open_gost_Click"/>
                     <MenuItem Header="Модель"
                               Name="Open_model" 
-                              Visibility="Collapsed" 
                               Command="Open"/>
                 </MenuItem>                         
                 <Separator/>
                 <MenuItem Header="Сохранить" 
-                          Command="Save"
-                          Name="Save_menu">
+                          Name="Save_menu_work_group"
+                          Command="Save"/>
+                <MenuItem Header="Сохранить как..." 
+                          Name="Save_menu_admin"
+                          Visibility="Collapsed">
                     <MenuItem Header="ГОСТ" 
                               Name="Save_gost" 
-                              Visibility="Collapsed" Click="Save_gost_Click" 
-                              />
+                              Click="Save_gost_Click"/>
                     <MenuItem Header="Модель"
                               Name="Save_model" 
-                              Visibility="Collapsed" 
                               Command="Save"/>
                 </MenuItem>
                 <Separator/>
@@ -158,6 +158,8 @@
                           Command="classes:Commands.Rename"/>
             </MenuItem>
             <MenuItem Header="Справка">
+                <MenuItem Header="Чат"
+                          Name="chat" Click="chat_Click"/>
                 <MenuItem Header="Просмотр справки"
                           Command="Help"/>
                 <Separator/>
@@ -177,8 +179,6 @@
                           Command="classes:Commands.WorkGroup"/>
                 <MenuItem Header="Администраторы"
                           Command="classes:Commands.Admins"/>
-                <MenuItem Header="Проверка"
-                          Command="classes:Commands.Check"/>
                 <MenuItem Header="Импорт" Click="MenuItem_Click"/>
             </MenuItem>
         </Menu>

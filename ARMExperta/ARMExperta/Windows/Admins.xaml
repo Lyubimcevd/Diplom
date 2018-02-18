@@ -18,17 +18,9 @@
             <RowDefinition Height="30"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
-        <DataGrid Grid.RowSpan="5" 
-                  Name="datagrid_admins" 
-                  AutoGenerateColumns="False" 
-                  MouseLeftButtonDown="datagrid_admins_MouseLeftButtonDown" 
-                  ColumnWidth="*">
-            <DataGrid.Columns>
-                <DataGridTextColumn Binding="{Binding Naim,Mode=OneWay}" 
-                                    Header="ФИО"/>
-            </DataGrid.Columns>
-        </DataGrid>
-            <Grid Grid.Column="1">
+        <ListBox Grid.RowSpan="5" 
+                 Name="listbox" MouseDoubleClick="listbox_MouseDoubleClick"/>
+        <Grid Grid.Column="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="50"/>
                 <ColumnDefinition/>
@@ -53,10 +45,14 @@
         <Button Grid.Column="1" 
                 Grid.Row="2" 
                 Content="Изменить" 
-                Click ="ChangeChoiceAdmin"/>
+                Click ="ChangeChoiceAdmin"
+                IsEnabled="False"
+                Name="change"/>
         <Button Grid.Column="1" 
                 Grid.Row="3" 
                 Content="Удалить" 
-                Click="DeleteChoiceAdmin"/>
+                Click="DeleteChoiceAdmin"
+                IsEnabled="False"
+                Name="delete"/>
     </Grid>
 </Window>

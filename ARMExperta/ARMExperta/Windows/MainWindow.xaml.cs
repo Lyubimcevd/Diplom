@@ -21,20 +21,33 @@ namespace ARMExperta.Windows
 {
     public partial class MainWindow : Window
     {
+        WorkGroups WG;
+
         public MainWindow()
         {
+            Login LG = new Login();
+            while (LG.EnterUser == null)
+            {
+                LG.ShowDialog();
+                if (LG.EnterUser == null)
+                {
+                    System.Windows.MessageBox.Show("Неверный логин или пароль", "АРМ Эксперта");
+                    LG = new Login();
+                }
+                else
+                    if (LG.EnterUser.Id == -1) Environment.Exit(0);              
+            }
+            CurrentSystemStatus.GetSS.CurrentUser = LG.EnterUser;
             InitializeComponent();
             DataContext = CurrentSystemStatus.GetSS;
             if (!CurrentSystemStatus.GetSS.CurrentUser.IsGroup)
             {
                 Admininstr.Visibility = Visibility.Visible;
-                Open_gost.Visibility = Visibility.Visible;
-                Open_model.Visibility = Visibility.Visible;
-                Open_menu.Command = null;
-                Save_gost.Visibility = Visibility.Visible;
-                Save_model.Visibility = Visibility.Visible;
-                Save_menu.Command = null;
-                Save_menu.Header = "Сохранить как...";
+                Open_menu_work_group.Visibility = Visibility.Collapsed;
+                Open_menu_admin.Visibility = Visibility.Visible;
+                Save_menu_work_group.Visibility = Visibility.Collapsed;
+                Save_menu_admin.Visibility = Visibility.Visible;
+                chat.Visibility = Visibility.Collapsed;
             }
             else Ready.Visibility = Visibility.Visible;
         }
@@ -45,7 +58,6 @@ namespace ARMExperta.Windows
         {
             if (CheckSave())
             {
-                CurrentSystemStatus.GetSS.CurrentUser.IsGOST = false;
                 CurrentSystemStatus.GetSS.UpdateTitle();
                 CurrentSystemStatus.GetSS.DictionaryTree.Clear();
                 StartWork();
@@ -54,14 +66,7 @@ namespace ARMExperta.Windows
 
         void CommandBinding_Open(object sender, ExecutedRoutedEventArgs e)
         {
-            if (CheckSave())
-            {              
-                CurrentSystemStatus.GetSS.CurrentUser.IsGOST = false;
-                CurrentSystemStatus.GetSS.DictionaryTree.Clear();
-                Server.GetServer.GetModalByUser(CurrentSystemStatus.GetSS.CurrentUser);
-                StartWork();
-                foreach (TreeViewModal tvm in CurrentSystemStatus.GetSS.DictionaryTree.Values) tvm.UpdateReady();               
-            }    
+            if (CheckSave()) OpenUserModel(CurrentSystemStatus.GetSS.CurrentUser);
         }
 
         void CommandBinding_Save(object sender, ExecutedRoutedEventArgs e)
@@ -179,18 +184,14 @@ namespace ARMExperta.Windows
 
         void CommandBinding_WorkGroup(object sender, ExecutedRoutedEventArgs e)
         {
-         
+            WG = new WorkGroups(this);
+            WG.Show();
         }
 
         void CommandBinding_Admins(object sender, ExecutedRoutedEventArgs e)
         {
             Admins Adm = new Admins();
             Adm.ShowDialog();
-        }
-
-        void CommandBinding_Check(object sender, ExecutedRoutedEventArgs e)
-        {
-          
         }
 
         #endregion
@@ -236,7 +237,7 @@ namespace ARMExperta.Windows
 
         private void Estimate_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         { 
-            if (CurrentSystemStatus.GetSS.CurrentElement != null&&!CurrentSystemStatus.GetSS.CurrentUser.IsGOST)
+            if (CurrentSystemStatus.GetSS.CurrentElement != null&&CurrentSystemStatus.GetSS.CurrentUser.GOST == 0)
             {
                 if (!CurrentSystemStatus.GetSS.IsExpert)
                 {
@@ -335,7 +336,8 @@ namespace ARMExperta.Windows
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            if (!CheckSave()) e.Cancel = true; 
+            if (!CheckSave()) e.Cancel = true;
+            if (WG != null) WG.Close();
         }
 
         private void MenuItem_Click(object sender, RoutedEventArgs e)
@@ -367,12 +369,11 @@ namespace ARMExperta.Windows
         {
             if (CheckSave())
             {
-                GOSTChoice GCh = new GOSTChoice();
-                GCh.ShowDialog();
-                if (GCh.Result != null)
+                Choice Ch = new Choice(Server.GetServer.GetGOSTs());
+                Ch.ShowDialog();
+                if (Ch.Result != 0)
                 {
-                    CurrentSystemStatus.GetSS.CurrentUser.IsGOST = true;
-                    CurrentSystemStatus.GetSS.CurrentUser.GOST = GCh.Result;
+                    CurrentSystemStatus.GetSS.CurrentUser.GOST = Ch.Result;
                     CurrentSystemStatus.GetSS.UpdateTitle();
                     CurrentSystemStatus.GetSS.DictionaryTree.Clear();
                     Server.GetServer.GetModalByUser(CurrentSystemStatus.GetSS.CurrentUser);
@@ -383,27 +384,30 @@ namespace ARMExperta.Windows
 
         private void Save_gost_Click(object sender, RoutedEventArgs e)
         {
-            if (CurrentSystemStatus.GetSS.CurrentUser.GOST == null)
-            {
-                System.Windows.MessageBox.Show("Введите название ГОСТа", "АРМ Эксперта");
-                WindowForEdit WFE = new WindowForEdit();
-                WFE.ShowDialog();
-                if (WFE.Result.Trim().Length != 0)
-                {
-                    CurrentSystemStatus.GetSS.CurrentUser.GOST = WFE.Result;
-                    Server.GetServer.AddNewGOST(CurrentSystemStatus.GetSS.CurrentUser.GOST);
-                    Server.GetServer.SaveOnServer(CurrentSystemStatus.GetSS.CurrentUser);
-                    System.Windows.MessageBox.Show("Сохранено", "АРМ Эксперта");
-                    CurrentSystemStatus.GetSS.CurrentUser.IsGOST = true;
-                    CurrentSystemStatus.GetSS.IsSave = true;
-                }
-            }
-            else
-            {
+            System.Windows.MessageBox.Show("Введите название ГОСТа", "АРМ Эксперта");
+            WindowForEdit WFE = new WindowForEdit();
+            WFE.ShowDialog();
+            if (CurrentSystemStatus.GetSS.StringIsCorrect(WFE.Result))
+            {               
+                CurrentSystemStatus.GetSS.CurrentUser.GOST = Server.GetServer.AddNewGOST(WFE.Result.Trim());
                 Server.GetServer.SaveOnServer(CurrentSystemStatus.GetSS.CurrentUser);
                 System.Windows.MessageBox.Show("Сохранено", "АРМ Эксперта");
+                CurrentSystemStatus.GetSS.CurrentUser.GOST = Server.GetServer.GetGOSTs().First(x=>x.Value == WFE.Result.Trim()).Key;
                 CurrentSystemStatus.GetSS.IsSave = true;
             }
+        }
+
+        public void OpenUserModel(User user)
+        {
+            CurrentSystemStatus.GetSS.DictionaryTree.Clear();
+            Server.GetServer.GetModalByUser(user);
+            StartWork();
+            foreach (TreeViewModal tvm in CurrentSystemStatus.GetSS.DictionaryTree.Values) tvm.UpdateReady();
+        }
+
+        private void chat_Click(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

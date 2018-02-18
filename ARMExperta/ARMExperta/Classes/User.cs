@@ -6,26 +6,29 @@ using System.Threading.Tasks;
 
 namespace ARMExperta.Classes
 {
-    class User
+    public class User
     {
-        string naim,
-            password,
-            gost_naim;
-        int id;
-        bool is_group,
-            is_gost;
-        public User(string p_naim,int p_id,string p_password,bool p_is_group)
+        int id,
+            id_gost;
+        bool is_group;
+        public User(int p_id,bool p_is_group)
         {
-            naim = p_naim;
             id = p_id;
             is_group = p_is_group;
-            password = p_password;
         }
         public string Naim
         {
             get
             {
-                return naim;
+
+                if (is_group)
+                {
+                    Dictionary<int, string> tmp = Server.GetServer.GetStudentsFromWorkGroup(Id);
+                    string result = "";
+                    foreach (string stud in tmp.Values) result += stud + " ";
+                    return result;
+                }
+                else return Server.GetServer.GetAdminFIO(id);
             }
         }
         public int Id
@@ -46,29 +49,34 @@ namespace ARMExperta.Classes
         {
             get
             {
-                return password;
+               return Server.GetServer.GetPassword(id, is_group);
             }
         }
-        public bool IsGOST
+        public int GOST
         {
             get
             {
-                return is_gost;
+                return id_gost;
             }
             set
             {
-                is_gost = value;
+                id_gost = value;
             }
         }
-        public string GOST
+        public int IdEucationGroup
         {
             get
             {
-                return gost_naim;
+                if (is_group) return Server.GetServer.GetEducationGroupOfStudent(Server.GetServer.GetStudentsFromWorkGroup(id).First().Key);
+                else return -1;
             }
-            set
+        }
+        public string Mark
+        {
+            get
             {
-                gost_naim = value;
+                if (is_group) return Server.GetServer.GetMarkOfWorkGroup(Id);
+                else return "";
             }
         }
     }

@@ -30,7 +30,7 @@
                        Margin="5"/>
             <ComboBox Grid.Column="1" 
                       Margin="5"
-                      Name="combobox_group" 
+                      Name="combobox" 
                       SelectionChanged="combobox_group_SelectionChanged"/>
         </Grid>
         <ListBox Grid.Row="1" 

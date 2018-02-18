@@ -8,7 +8,7 @@
         Title="АРМ Эксперта" 
         Height="190" 
         Width="285" 
-        ResizeMode="NoResize">
+        ResizeMode="NoResize" Closing="Window_Closing">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="35"/>
@@ -35,7 +35,8 @@
             <ComboBox Margin="5" 
                       Height="25" 
                       IsEditable="True"
-                      Name="combobox_login"/>
+                      Name="combobox"
+                      DisplayMemberPath="Naim"/>
             <Image Grid.Column="1"/>
         </Grid>
         <PasswordBox Grid.Row="1"

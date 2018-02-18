@@ -5,25 +5,71 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ARMExperta.Windows"
         mc:Ignorable="d"
-        Title="Рабочие группы" Height="300" Width="300">
+        Title="Рабочие группы" 
+        Height="250" 
+        Width="465">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition/>
-            <ColumnDefinition/>
+            <ColumnDefinition Width="200"/>
+            <ColumnDefinition Width="250"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
+            <RowDefinition Height="25"/>
             <RowDefinition/>
             <RowDefinition Height="30"/>
-            <RowDefinition/>
-            <RowDefinition/>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="30"/>
         </Grid.RowDefinitions>
-        <ComboBox/>
-        <ListBox Grid.Column="1"/>
-        <Grid Grid.Column="1" Grid.Row="1">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="140"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="Группа: " 
+                       TextAlignment="Center" 
+                       HorizontalAlignment="Center" 
+                       VerticalAlignment="Center"/>
+            <ComboBox Grid.Column="1"
+                      Name="combobox" 
+                      SelectionChanged="combobox_SelectionChanged"
+                      DisplayMemberPath="Naim"/>
+        </Grid>
+        <Grid Grid.Column="1" 
+              Grid.RowSpan="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
                 <ColumnDefinition/>
-                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <ListBox Grid.RowSpan="2"
+                     Name="listbox"/>
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <Button Content="Добавить студента" 
+                        Click="Add_Student"/>
+                <Button Content="Удалить студента"
+                        Grid.Row="1" 
+                        Click="Delete_Student"/>
+                <TextBlock Text="Пароль" 
+                           HorizontalAlignment="Center" 
+                           VerticalAlignment="Center"
+                           Grid.Row="2"/>
+                <PasswordBox Name="passwordbox"
+                             Grid.Row="3"/>
+            </Grid>
+        </Grid>
+        <Button Content="Модель" 
+                Grid.Column="1" 
+                Grid.Row="2"
+                Name="model" Click="model_Click"/>
+        <Grid Grid.Column="1" 
+              Grid.Row="3" 
+              Grid.RowSpan="2">
+            <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
@@ -31,34 +77,39 @@
                 <RowDefinition/>
                 <RowDefinition/>
             </Grid.RowDefinitions>
-            <RadioButton Margin="7,0,0,0"/>
-            <RadioButton Grid.Column="1" 
-                         Margin="7,0,0,0"/>
-            <RadioButton Grid.Column="2" 
-                         Margin="7,0,0,0"/>
-            <RadioButton Grid.Column="3" 
-                         Margin="7,0,0,0"/>
-            <RadioButton Grid.Column="4" 
-                         Margin="7,0,0,0"/>
-            <TextBlock Grid.Row="1" 
-                       Text="1" 
-                       TextAlignment="Center"/>
-            <TextBlock Grid.Row="1" 
-                       Grid.Column="1" 
-                       Text="2" 
-                       TextAlignment="Center"/>
-            <TextBlock Grid.Row="1" 
-                       Grid.Column="2" 
-                       Text="3" 
-                       TextAlignment="Center"/>
-            <TextBlock Grid.Row="1" 
-                       Grid.Column="3" 
-                       Text="4" 
-                       TextAlignment="Center"/>
-            <TextBlock Grid.Row="1" 
-                       Grid.Column="4" 
-                       Text="5" 
-                       TextAlignment="Center"/>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="Оценка: " 
+                           TextAlignment="Center" 
+                           HorizontalAlignment="Center" 
+                           VerticalAlignment="Center"/>
+                <ComboBox Grid.Column="1"
+                          Name="mark">
+                    <ComboBoxItem Content="1"/>
+                    <ComboBoxItem Content="2"/>
+                    <ComboBoxItem Content="3"/>
+                    <ComboBoxItem Content="4"/>
+                    <ComboBoxItem Content="5"/>
+                </ComboBox>
+            </Grid>
+            <Button Content="Сохранить" 
+                    Grid.Row="1"
+                    Name="save" Click="save_Click"/>
+            <Button Content="Чат"
+                    Grid.Column="1"
+                    Name="chat"/>
+            <Button Content="Удалить" 
+                    Grid.Row="1" 
+                    Grid.Column="1"
+                    Name="delete" 
+                    Click="Delete_Group"/>
         </Grid>
+        <Button Grid.Row="2"
+                Grid.RowSpan="3"
+                Content="Раздать ГОСТ" 
+                Click="Give_Gost"/>
     </Grid>
 </Window>

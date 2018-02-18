@@ -88,16 +88,20 @@
     <Compile Include="Classes\CurrentSystemStatus.cs" />
     <Compile Include="Classes\Print.cs" />
     <Compile Include="Classes\SaveClass.cs" />
+    <Compile Include="Classes\Message.cs" />
     <Compile Include="Classes\TreeViewModal.cs" />
     <Compile Include="Classes\User.cs" />
     <Compile Include="Windows\Admins.xaml.cs">
       <DependentUpon>Admins.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Windows\Chat.xaml.cs">
+      <DependentUpon>Chat.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Windows\EducationGroups.xaml.cs">
       <DependentUpon>EducationGroups.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Windows\GOSTChoice.xaml.cs">
-      <DependentUpon>GOSTChoice.xaml</DependentUpon>
+    <Compile Include="Windows\Choice.xaml.cs">
+      <DependentUpon>Choice.xaml</DependentUpon>
     </Compile>
     <Compile Include="Windows\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
@@ -118,11 +122,15 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Windows\Chat.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Windows\EducationGroups.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Windows\GOSTChoice.xaml">
+    <Page Include="Windows\Choice.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
