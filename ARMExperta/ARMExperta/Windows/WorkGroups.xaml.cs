@@ -20,6 +20,7 @@ namespace ARMExperta.Windows
         List<User> groups;
         Dictionary<int, string> students;
         MainWindow main_window;
+        string preview_mark;
 
         public WorkGroups(MainWindow p_main_window)
         {
@@ -47,6 +48,8 @@ namespace ARMExperta.Windows
                 listbox.ItemsSource = students.Values.ToList();
                 passwordbox.Password = groups.First(x => x == combobox.SelectedItem).Password;
                 mark.Text = groups.First(x => x == combobox.SelectedItem).Mark;
+                preview_mark = mark.Text;
+                if (groups.First(x => x == combobox.SelectedItem).IsReady) ready.Text = "ГОТОВА";
             }
         }
 
@@ -106,8 +109,27 @@ namespace ARMExperta.Windows
         {
             Server.GetServer.UpdateWorkGroup(students, groups.First(x => x == combobox.SelectedItem).Id);
             Server.GetServer.UpdatePasswordForWorkGroup(passwordbox.Password, groups.First(x => x == combobox.SelectedItem).Id);
-            if (mark.SelectedItem != null) Server.GetServer.UpdateMarkForWorkGroup(mark.Text, groups.First(x => x == combobox.SelectedItem).Id);
+            if (preview_mark!=mark.Text)
+            {
+                Server.GetServer.UpdateMarkForWorkGroup(mark.Text, groups.First(x => x == combobox.SelectedItem).Id);
+                Server.GetServer.SendMessage("Оценка " + mark.SelectedValue + ".", CurrentSystemStatus.GetSS.CurrentUser.Id, 
+                    groups.First(x => x == combobox.SelectedItem).Id, true);
+            }
             MessageBox.Show("Сохранено", "АРМ Эксперта");
+        }
+
+        private void chat_Click(object sender, RoutedEventArgs e)
+        {
+            if (CurrentSystemStatus.GetSS.OpenChats.ContainsKey(groups.First(x=>x == combobox.SelectedItem).Id))
+            {
+                CurrentSystemStatus.GetSS.OpenChats[groups.First(x => x == combobox.SelectedItem).Id].Update();
+                CurrentSystemStatus.GetSS.OpenChats[groups.First(x => x == combobox.SelectedItem).Id].Activate();
+            }
+            else
+            {
+                Chat Ch = new Chat(groups.First(x => x == combobox.SelectedItem).Id);
+                Ch.Show();
+            }
         }
     }
 }

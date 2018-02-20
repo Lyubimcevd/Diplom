@@ -79,5 +79,13 @@ namespace ARMExperta.Classes
                 else return "";
             }
         }
+        public bool IsReady
+        {
+            get
+            {
+                if (IsGroup) return Server.GetServer.GetReadyOfWorkGroup(Id);
+                else return true;
+            }
+        }
     }
 }

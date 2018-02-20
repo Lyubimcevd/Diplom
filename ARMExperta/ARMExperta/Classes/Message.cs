@@ -8,18 +8,25 @@ namespace ARMExperta.Classes
 {
     public class Message
     {
-        string time,
-            sms,
+        string sms,
             sms_dir;
-        public Message(string p_time,string p_sms,int id_admin,int id_group,bool dir)
+        DateTime time;
+        public Message(DateTime p_time,string p_sms,int frwho,bool fradm)
         {
             time = p_time;
             sms = p_sms;
-            if (dir) sms_dir = Server.GetServer.GetAdminFIO(id_admin) + " -> " + Server.GetServer.GetWorkGroups().First(x => x.Id == id_group).Naim;
-            else sms_dir = Server.GetServer.GetWorkGroups().First(x => x.Id == id_group).Naim + " -> " + Server.GetServer.GetAdminFIO(id_admin);
+            if (fradm) sms_dir = "От: " + Server.GetServer.GetAdminFIO(frwho);
+            else sms_dir = "От: "+Server.GetServer.GetWorkGroups().First(x => x.Id == frwho).Naim;
         }
 
-        public string Time
+        public string TimeShow
+        {
+            get
+            {
+                return time.ToShortTimeString();
+            }
+        }
+        public DateTime Time
         {
             get
             {

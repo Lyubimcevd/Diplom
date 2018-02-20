@@ -100,16 +100,18 @@
                     Name="save" Click="save_Click"/>
             <Button Content="Чат"
                     Grid.Column="1"
-                    Name="chat"/>
+                    Name="chat" Click="chat_Click"/>
             <Button Content="Удалить" 
                     Grid.Row="1" 
                     Grid.Column="1"
                     Name="delete" 
                     Click="Delete_Group"/>
         </Grid>
-        <Button Grid.Row="2"
-                Grid.RowSpan="3"
+        <Button Grid.Row="3"
+                Grid.RowSpan="2"
                 Content="Раздать ГОСТ" 
                 Click="Give_Gost"/>
+        <TextBlock Name="ready"
+                   Grid.Row="2"/>
     </Grid>
 </Window>

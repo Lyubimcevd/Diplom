@@ -20,7 +20,7 @@ namespace ARMExperta.Classes
         List<Dictionary<int, TreeViewModal>> history = new List<Dictionary<int, TreeViewModal>>();
         User current_user;
         TreeViewModal current_element;
-        Chat ch = new Chat();
+        Dictionary<int, Chat> chats = new Dictionary<int, Chat>();
 
         static CurrentSystemStatus current_sys_stat;
         public event PropertyChangedEventHandler PropertyChanged;
@@ -141,6 +141,14 @@ namespace ARMExperta.Classes
                 else return false;
             }
         }
+        public string ColorReady
+        {
+            get
+            {
+                if (CurrentUser.IsReady) return "Green";
+                else return "Red";
+            }
+        }
        
         public void AddInHistory()
         {
@@ -203,6 +211,10 @@ namespace ARMExperta.Classes
         {
             OnPropertyChanged("Title");
         }
+        public void UpdateColorReady()
+        {
+            OnPropertyChanged("ColorReady");
+        }
         public bool StringIsCorrect(string str)
         {
             if (str.Trim().Length != 0) return true;
@@ -220,11 +232,11 @@ namespace ARMExperta.Classes
             }
             return result;
         }
-        public Chat ChatWindow
+        public Dictionary<int,Chat> OpenChats
         {
             get
             {
-                return ch;
+                return chats;
             }
         }
     }

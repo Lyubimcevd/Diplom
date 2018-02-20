@@ -169,7 +169,8 @@
             <MenuItem Header="ГОТОВО" 
                       Visibility="Collapsed"
                       Command="classes:Commands.Ready"
-                      Name="Ready"/>
+                      Name="Ready"
+                      Foreground="{Binding ColorReady}"/>
             <MenuItem Header="Администрирование" 
                       Name="Admininstr"
                       Visibility="Collapsed">

@@ -20,12 +20,17 @@ namespace ARMExperta.Classes
         SqlDataAdapter DA;
         SqlCommandBuilder CB;
         string str_connect = "Data Source=DESKTOP-VG00B4C;Initial Catalog=ARMExperta;Integrated Security=true;MultipleActiveResultSets=True";
+        System.Timers.Timer time;
 
         Server()
         {
             conn = new SqlConnection(str_connect);
             conn.Open();
             SqlDependency.Start(str_connect);
+            time = new System.Timers.Timer(60000);
+            time.Elapsed += UpdateConnection;
+            time.AutoReset = true;
+            time.Enabled = true;
             Cardinal();
         }
         public static Server GetServer
@@ -127,15 +132,21 @@ namespace ARMExperta.Classes
         }
         public string GetMarkOfWorkGroup(int p_id)
         {
-            return ExecuteCommand("select mark from work_group where id = " + p_id)[0].ToString();
+            List<object> mark_work_group = ExecuteCommand("select mark from work_group where id = " + p_id);
+            if (mark_work_group[0] == null) return null;
+            else return mark_work_group[0].ToString();
         }
-        public List<Message> GetLastMessages(int p_id)
+        public List<Message> GetLastMessages(int frwho,int towho,bool fradm)
         {
             List<Message> result = new List<Message>();
-            List<object> all_messages_id = ExecuteCommand("select * from chat where wg = " + p_id);
-            for (int i = 0; i < all_messages_id.Count; i += 5) result.Add(new Message(Convert.ToDateTime(all_messages_id[i]).ToShortTimeString(),
-                  all_messages_id[i+1].ToString(), Convert.ToInt32(all_messages_id[i+2]), Convert.ToInt32(all_messages_id[i+3]), Convert.ToBoolean(all_messages_id[i+4])));
+            List<object> all_messages_id = ExecuteCommand("select dt,sms,frwho from chat where towho = "+towho+" and frwho = "+frwho+" and fradm = '"+fradm+"'");
+            for (int i = 0; i < all_messages_id.Count; i += 3) result.Add(new Message(Convert.ToDateTime(all_messages_id[i]),
+                  all_messages_id[i+1].ToString(), Convert.ToInt32(all_messages_id[i+2]), fradm));
             return result;
+        }
+        public bool GetReadyOfWorkGroup(int p_id)
+        {
+            return Convert.ToBoolean(ExecuteCommand("select is_ready from work_group where id = " + p_id)[0]);
         }
 
         public int AddNewWorkGroup(string pwd)
@@ -245,11 +256,23 @@ namespace ARMExperta.Classes
             CurrentSystemStatus.GetSS.CurrentUser.GOST = 0;
         }
 
+        public void SetReadyOfWorkGroup(bool is_ready)
+        {
+            ExecuteCommand("update work_group set is_ready = '" + is_ready + "' where id = " + CurrentSystemStatus.GetSS.CurrentUser.Id);
+        }
+
+        public void SendMessage(string text,int frwho,int towho,bool fradm)
+        {
+            ExecuteCommand("INSERT INTO chat(sms,frwho,towho,fradm) VALUES ('"+text+"',"+frwho+","+towho+ ",'"+fradm+ "')");
+        }
+
         //Система слежения. Ядро Cardinal
 
         SqlDependency sqlDependencyStalker;
         Dispatcher Dis = Dispatcher.CurrentDispatcher;
-        string log_caption, group;
+        Message mes;
+        int towho,
+            frwho;
 
         void Cardinal()
         {
@@ -269,18 +292,30 @@ namespace ARMExperta.Classes
         void OnDatabaseChange_dt(object sender, SqlNotificationEventArgs e)
         {
             List<object> sms_chat = ExecuteCommand("select top 1 * from chat order by dt desc");
-            string dt = Convert.ToDateTime(sms_chat[0]).ToShortTimeString();
-            string sms = sms_chat[1].ToString();
-            int adm = Convert.ToInt32(sms_chat[2]);
-            int wg = Convert.ToInt32(sms_chat[3]);
-            bool dir = Convert.ToBoolean(sms_chat[4]);
-            if (dir&&CurrentSystemStatus.GetSS.CurrentUser.Id == wg||!dir&&CurrentSystemStatus.GetSS.CurrentUser.Id == adm)          
+            frwho = Convert.ToInt32(sms_chat[2]);
+            towho = Convert.ToInt32(sms_chat[3]);
+            mes = new Message(Convert.ToDateTime(sms_chat[0]), sms_chat[1].ToString(), frwho, Convert.ToBoolean(sms_chat[4]));
+            if (CurrentSystemStatus.GetSS.CurrentUser.Id == towho) Dis.Invoke(new Action(OpenChat));
+            Cardinal();
+        }
+
+        void OpenChat()
+        {
+            if (CurrentSystemStatus.GetSS.OpenChats.ContainsKey(frwho))
             {
-                //Dis.Invoke(new Action());
-                CurrentSystemStatus.GetSS.ChatWindow.Visibility = Visibility.Visible;
-                CurrentSystemStatus.GetSS.ChatWindow.NewSms(new Message(dt, sms, adm, wg, dir));
-                Cardinal();
+                CurrentSystemStatus.GetSS.OpenChats[frwho].Update();
+                CurrentSystemStatus.GetSS.OpenChats[frwho].Activate();
             }
+            else
+            {
+                Chat Ch = new Chat(frwho);
+                Ch.ShowDialog();
+            }
+        }
+
+        void UpdateConnection(Object source, System.Timers.ElapsedEventArgs e)
+        {
+            Cardinal();
         }
     }
 }

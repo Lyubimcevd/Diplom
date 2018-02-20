@@ -173,7 +173,20 @@ namespace ARMExperta.Windows
 
         void CommandBinding_Ready(object sender, ExecutedRoutedEventArgs e)
         {
-            
+            string mes = "Группа: " + CurrentSystemStatus.GetSS.CurrentUser.Naim;
+            if (!CurrentSystemStatus.GetSS.CurrentUser.IsReady)
+            {
+                mes += " готова!";
+                Server.GetServer.SetReadyOfWorkGroup(true);
+            }
+            else
+            {
+                mes += " не готова!";
+                Server.GetServer.SetReadyOfWorkGroup(false);
+            }
+            List<User> admins = Server.GetServer.GetAdmins();
+            foreach (User us in admins) Server.GetServer.SendMessage(mes, CurrentSystemStatus.GetSS.CurrentUser.Id, us.Id ,false);
+            CurrentSystemStatus.GetSS.UpdateColorReady();
         }
 
         void CommandBinding_EducationGroup(object sender, ExecutedRoutedEventArgs e)
@@ -407,7 +420,8 @@ namespace ARMExperta.Windows
 
         private void chat_Click(object sender, RoutedEventArgs e)
         {
-
+            Chat Ch = new Chat();
+            Ch.ShowDialog();
         }
     }
 }
