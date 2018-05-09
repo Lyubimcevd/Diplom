@@ -48,7 +48,6 @@ namespace ARMExperta.Windows
             users = Server.GetServer.GetWorkGroups();
             users.AddRange(Server.GetServer.GetAdmins());           
             combobox.ItemsSource = users;
-            combobox.SelectedIndex = 0;
         }
 
         private void passwordbox_KeyDown(object sender, KeyEventArgs e)

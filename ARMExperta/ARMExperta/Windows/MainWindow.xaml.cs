@@ -70,10 +70,20 @@ namespace ARMExperta.Windows
         }
 
         void CommandBinding_Save(object sender, ExecutedRoutedEventArgs e)
-        {                   
+        {
+            if (!CurrentSystemStatus.GetSS.CurrentUser.IsGroup)
+            {
+                MessageBoxResult result = System.Windows.MessageBox.Show("Сохранить как ГОСТ?", "АРМ Эксперта", MessageBoxButton.YesNoCancel);
+                if (result == MessageBoxResult.Yes)
+                {
+                    Save_gost_Click(null, null);
+                    return;
+                }
+                if (result == MessageBoxResult.Cancel) return;
+            }
             Server.GetServer.SaveOnServer(CurrentSystemStatus.GetSS.CurrentUser);
             System.Windows.MessageBox.Show("Сохранено", "АРМ Эксперта");
-            CurrentSystemStatus.GetSS.IsSave = true;   
+            CurrentSystemStatus.GetSS.IsSave = true;
         }
 
         void CommandBinding_Undo(object sender, ExecutedRoutedEventArgs e)
@@ -130,7 +140,7 @@ namespace ARMExperta.Windows
 
         void CommandBinding_Help(object sender, ExecutedRoutedEventArgs e)
         {
-
+            Help.ShowHelp(sender as System.Windows.Forms.Control, "help.chm");
         }
 
         void CommandBinding_Close(object sender, ExecutedRoutedEventArgs e)
@@ -168,6 +178,7 @@ namespace ARMExperta.Windows
 
         void CommandBinding_Print(object sender, ExecutedRoutedEventArgs e)
         {
+            System.Windows.MessageBox.Show("Отработало нажатие");
             Print.GetPrint.PrintDocument(CurrentSystemStatus.GetSS.Tree[0]);
         }
 
@@ -177,12 +188,12 @@ namespace ARMExperta.Windows
             if (!CurrentSystemStatus.GetSS.CurrentUser.IsReady)
             {
                 mes += " готова!";
-                Server.GetServer.SetReadyOfWorkGroup(true);
+                Server.GetServer.SetReadyOfWorkGroup(true, CurrentSystemStatus.GetSS.CurrentUser.Id);
             }
             else
             {
                 mes += " не готова!";
-                Server.GetServer.SetReadyOfWorkGroup(false);
+                Server.GetServer.SetReadyOfWorkGroup(false, CurrentSystemStatus.GetSS.CurrentUser.Id);
             }
             List<User> admins = Server.GetServer.GetAdmins();
             foreach (User us in admins) Server.GetServer.SendMessage(mes, CurrentSystemStatus.GetSS.CurrentUser.Id, us.Id ,false);

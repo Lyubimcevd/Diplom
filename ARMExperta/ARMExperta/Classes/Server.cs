@@ -9,21 +9,24 @@ using System.Collections;
 using System.Windows.Threading;
 using System.Windows;
 using ARMExperta.Windows;
+using System.IO;
 
 namespace ARMExperta.Classes
 {
     class Server
     {
-        static Server server;
+        static DBFFiles server;
         SqlConnection conn;
         DataTable DT;
         SqlDataAdapter DA;
         SqlCommandBuilder CB;
-        string str_connect = "Data Source=DESKTOP-VG00B4C;Initial Catalog=ARMExperta;Integrated Security=true;MultipleActiveResultSets=True";
+        string str_connect;
         System.Timers.Timer time;
 
         Server()
         {
+            StreamReader SR = new StreamReader("connect_string.cfg");
+            str_connect = SR.ReadLine();
             conn = new SqlConnection(str_connect);
             conn.Open();
             SqlDependency.Start(str_connect);
@@ -33,12 +36,14 @@ namespace ARMExperta.Classes
             time.Enabled = true;
             Cardinal();
         }
-        public static Server GetServer
+        public static DBFFiles GetServer
         {
             get
             {
-                if (server == null) server = new Server();
+                if (server == null) server = new DBFFiles();
                 return server;
+                //if (server == null) server = new Server();
+                //return server;
             }
         }
 
@@ -256,9 +261,9 @@ namespace ARMExperta.Classes
             CurrentSystemStatus.GetSS.CurrentUser.GOST = 0;
         }
 
-        public void SetReadyOfWorkGroup(bool is_ready)
+        public void SetReadyOfWorkGroup(bool is_ready,int p_id)
         {
-            ExecuteCommand("update work_group set is_ready = '" + is_ready + "' where id = " + CurrentSystemStatus.GetSS.CurrentUser.Id);
+            ExecuteCommand("update work_group set is_ready = '" + is_ready + "' where id = " + p_id);
         }
 
         public void SendMessage(string text,int frwho,int towho,bool fradm)

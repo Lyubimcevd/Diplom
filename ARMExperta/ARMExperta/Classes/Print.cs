@@ -5,6 +5,7 @@ using System.Reflection;
 using System.IO;
 using iTextSharp.text;
 using iTextSharp.text.pdf;
+using System.Windows;
 
 namespace ARMExperta.Classes
 {
@@ -23,14 +24,18 @@ namespace ARMExperta.Classes
             get
             {
                 if (print == null) print = new Print();
+                MessageBox.Show("Объект печати выдан");
                 return print;
             }
         }
   
         public void PrintDocument(TreeViewModal tree)
         {
+            MessageBox.Show("Старт процедуры печати");
             iTextSharp.text.Document doc = new iTextSharp.text.Document();
+            MessageBox.Show("Документ создан программно");
             PdfWriter.GetInstance(doc, new FileStream("pdfTables.pdf", FileMode.Create));
+            MessageBox.Show("Документ создан физически");
             doc.Open();
             baseFont = BaseFont.CreateFont("C:/Windows/Fonts/arial.ttf", BaseFont.IDENTITY_H, BaseFont.NOT_EMBEDDED);
             font = new iTextSharp.text.Font(baseFont, iTextSharp.text.Font.DEFAULTSIZE, iTextSharp.text.Font.NORMAL);

@@ -49,7 +49,7 @@ namespace ARMExperta.Windows
                 passwordbox.Password = groups.First(x => x == combobox.SelectedItem).Password;
                 mark.Text = groups.First(x => x == combobox.SelectedItem).Mark;
                 preview_mark = mark.Text;
-                if (groups.First(x => x == combobox.SelectedItem).IsReady) ready.Text = "ГОТОВА";
+                UpdateReadyButton();
             }
         }
 
@@ -60,8 +60,16 @@ namespace ARMExperta.Windows
             Ch.ShowDialog();
             if (Ch.Result != 0)
             {
-                students.Add(Ch.Result, tmp[Ch.Result]);
-                listbox.ItemsSource = students.Values.ToList();
+                if (!students.Keys.Contains(Ch.Result))
+                {
+                    if (CheckStudentsAlone(Ch.Result))
+                    {
+                        students.Add(Ch.Result, tmp[Ch.Result]);
+                        listbox.ItemsSource = students.Values.ToList();
+                    }
+                    else MessageBox.Show("Студент состоит в другой группе", "АРМ Эксперта");
+                }
+                else MessageBox.Show("Студент уже добавлен в группу", "АРМ Эксперта"); 
             }
         }
 
@@ -112,7 +120,7 @@ namespace ARMExperta.Windows
             if (preview_mark!=mark.Text)
             {
                 Server.GetServer.UpdateMarkForWorkGroup(mark.Text, groups.First(x => x == combobox.SelectedItem).Id);
-                Server.GetServer.SendMessage("Оценка " + mark.SelectedValue + ".", CurrentSystemStatus.GetSS.CurrentUser.Id, 
+                Server.GetServer.SendMessage("Оценка " + mark.Text + ".", CurrentSystemStatus.GetSS.CurrentUser.Id, 
                     groups.First(x => x == combobox.SelectedItem).Id, true);
             }
             MessageBox.Show("Сохранено", "АРМ Эксперта");
@@ -129,6 +137,37 @@ namespace ARMExperta.Windows
             {
                 Chat Ch = new Chat(groups.First(x => x == combobox.SelectedItem).Id);
                 Ch.Show();
+            }
+        }
+
+        bool CheckStudentsAlone(int stud_id)
+        {
+            List<User> tmp = Server.GetServer.GetWorkGroups();
+            foreach (User us in tmp)
+            {
+                if (Server.GetServer.GetStudentsFromWorkGroup(us.Id).Keys.Contains(stud_id)) return false;                    
+            }
+            return true;
+        }
+
+        private void ready_Click(object sender, RoutedEventArgs e)
+        {
+            if (groups.First(x => x == combobox.SelectedItem).IsReady) Server.GetServer.SetReadyOfWorkGroup(false, groups.First(x => x == combobox.SelectedItem).Id); 
+            else Server.GetServer.SetReadyOfWorkGroup(true, groups.First(x => x == combobox.SelectedItem).Id);
+            UpdateReadyButton();
+        }
+
+        void UpdateReadyButton()
+        {
+            if (groups.First(x => x == combobox.SelectedItem).IsReady)
+            {
+                ready.Content = "ГОТОВА";
+                ready.Background = Brushes.Green;
+            }
+            else
+            {
+                ready.Content = "НЕ ГОТОВА";
+                ready.Background = Brushes.Red;
             }
         }
     }
