@@ -150,7 +150,8 @@ namespace ARMExperta.Windows
 
         void CommandBinding_About(object sender, ExecutedRoutedEventArgs e)
         {
-           
+            AboutBox AB = new AboutBox();
+            AB.ShowDialog();
         }
 
         void CommandBinding_AddElement(object sender, ExecutedRoutedEventArgs e)
